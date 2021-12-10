@@ -1,22 +1,22 @@
-nstall:
+install:
 	poetry install
 page-loader:
 	poetry run page_loader -h
 
+fake:
+	poetry run page_loader https://docs.python.org/3/library/venv.html#venv-def/ --output tests/
 tests:
-	poetry run coverage run -m pytest -vv
+	poetry run pytest -vv
 
 coverage:
-	poetry run coverage report
+	poetry run pytest --cov=page_loader
 
 build:
 	poetry build
-publish:
-	poetry publish --dry-run
 package-install:
 	python3 -m pip install --user dist/*.whl
 package-uninstall:
 	python3 -m pip uninstall hexlet-code
 lint:
 	poetry run flake8 page_loader
-.PHONY: install gendiff build publish package-install tests coverage gentest1 gentest2 gentest3
+.PHONY: install page-loader build package-install tests coverage

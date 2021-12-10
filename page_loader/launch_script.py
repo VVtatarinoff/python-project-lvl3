@@ -2,13 +2,13 @@
 import os
 import argparse
 
-from loader import download
+from page_loader.loader import download
 
 current_path = os.getcwd()
-ARGUMENTS = [ [('-out', '--output'), {'metavar': 'OUTPUT', 'help': 'path to save output html file',
-                          'default': current_path,
-                          "choices": list(CHOICES.keys())}]
-            [('site', ), {}]]
+ARGUMENTS = [[('-out', '--output'), {'metavar': 'OUTPUT',
+                                     'help': 'path to save output html file',
+                                     'default': current_path, }],
+             [('site', ), {'help': 'url link to website'}]]
 
 
 def prepare_argparse_object():

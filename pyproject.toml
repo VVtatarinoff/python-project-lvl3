@@ -7,17 +7,20 @@ packages = [
   { include = "page_loader" },]
 
 [tool.poetry.scripts]
-page-loader = "page_loader.launch_script:main"
+page_loader = "page_loader.launch_script:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.26.0"
-requests-mock = "^1.9.3"
 argparse = "^1.4.0"
+fake-useragent = "^0.1.11"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 flake8 = "^4.0.1"
+requests-mock = "^1.9.3"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
