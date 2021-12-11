@@ -4,7 +4,7 @@ page-loader:
 	poetry run page_loader -h
 
 fake:
-	poetry run page_loader https://docs.python.org/3/library/venv.html#venv-def/ --output tests/
+	poetry run page_loader https://www.jetbrains.com/ru-ru/pycharm/whatsnew/ --output tests/
 tests:
 	poetry run pytest -vv
 
