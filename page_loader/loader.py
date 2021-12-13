@@ -1,9 +1,7 @@
 import os
 import re
-from bs4 import BeautifulSoup
 import requests
 from operator import truth
-import urllib3
 from fake_useragent import UserAgent
 from page_loader.page import Page
 
@@ -11,85 +9,56 @@ from page_loader.page import Page
 CURRENT_DIR = os.getcwd()
 
 
-def generate_file_name(from_path):
+def generate_file_name(from_path, put_extension=False):
     url_split = re.split(r"[\W]+", from_path)
     url_split = list(filter(truth, url_split))
-    extension = url_split.pop()
-    url_split[-1] = f"{url_split[-1]}.{extension}"
+    if put_extension:
+        extension = url_split.pop()
+        url_split[-1] = f"{url_split[-1]}.{extension}"
     file_name = '-'.join(url_split[1:])
     return file_name
 
-#
-#def download(url, directory):
-#    ua = UserAgent()
-#    storage_path = os.path.join(CURRENT_DIR, directory)
-#    file_name = generate_file_name(url)
-#    headers = {'User-Agent': ua.random}
-    # parsed = urllib3.util.parse_url(url)
-#    response = requests.get(url, headers=headers)
-#    with open(os.path.join(storage_path, file_name), 'w') as file:
-#        file.write(response.text)
-def extract_images(page):
-    soup = BeautifulSoup(page.get_html(), "html.parser")
-    images = dict()
-    for image in  soup.find_all('img'):
-        source = image['src']
-        source_parsed = urllib3.util.parse_url(source)
-        page_source = page.get_parsed()
-        normolized_source = source
-        if source_parsed.scheme:
-            if source_parsed.host != page_source.host:
-                normolized_source = None
-        else:
-            source_parsed = source_parsed._replace (scheme = page_source.scheme)
-            source_parsed = source_parsed._replace (host = page_source.host)
-            normolized_source = source_parsed.url
-        if normolized_source:
-            images[source] = normolized_source
-    return images
 
-def load_images(images_ref, path, dir):
-    dir_name = os.path.join(path, dir)
-    try:
-        os.mkdir(dir_name)
-    except:
-        pass
-    new_images = dict()
-    for ref_short, ref_full in images_ref.items():
-        ua = UserAgent()
-        headers = {'User-Agent': ua.random}
-        response = requests.get(ref_full, headers=headers)
-        if response.status_code != requests.codes.ok:
-            print("адрес с картинкой некорректнй: ", ref_full)
-            continue
-        content_type = response.headers['content-type']
-        if not content_type.lower().startswith('image'):
-            print("по адресу нет картинки ", ref_full)
-            continue
-        file_name = generate_file_name(ref_full)
+def save_to_path(content, mode, path):
+    with open(path, mode) as file:
+        file.write(content)
+    print("записан, ", path)
 
-        with open(os.path.join(dir_name, file_name), 'wb') as file:
-            file.write(response.content)
-            print("Записан ", file_name)
-        
-        new_images[ref_short] = os.path.join(dir, file_name)
-    return new_images
 
-def change_image_link(page, new_links):
-    soup = BeautifulSoup(page.get_html(), "html.parser")
-    for image in  soup.find_all('img'):
-        print(image)
-        image['src'] = new_links[image['src']]
-        print(image)
-    page.html = soup.prettify()
+def upload_from_web(url, path_to_save=None):
+    ua = UserAgent()
+    headers = {'User-Agent': ua.random}
+    response = requests.get(url, headers=headers)
+    if response.status_code != requests.codes.ok:
+        print("адрес некорректный: ", url)
+        return False
+    content_type = response.headers['content-type']
+    if not path_to_save:
+        return response.content
+    if content_type.lower().startswith('image'):
+        mode = 'wb'
+    else:
+        mode = "w"
+    save_to_path(response.content, mode, path_to_save)
+    return True
 
-def download(url, directory):
+
+def copy_html_to_path(url, directory):
     storage_path = os.path.join(CURRENT_DIR, directory)
-    page = Page(url, storage_path)
-    file_name = page.get_file_name()
-    files_directory = f"{file_name}_files"
-    images = extract_images(page)
-    new_links = load_images(images, storage_path, files_directory)
-    change_image_link(page, new_links)
-    with open(os.path.join(storage_path, file_name), 'w') as file:
-        file.write(page.get_html())
+    html_name = generate_file_name(url)
+    subdirectory = html_name + "_files"
+    html_name = html_name + ".html"
+    abs_subdirectory = os.path.join(storage_path, subdirectory)
+    if not os.path.exists(abs_subdirectory):
+        os.mkdir(abs_subdirectory)
+    page = Page(upload_from_web(url), url)
+    images = page.image_references
+    replacements = dict()
+    for image in images:
+        file_name = generate_file_name(image, put_extension=True)
+        file_path = os.path.join(abs_subdirectory, file_name)
+        flag = upload_from_web(image, file_path)
+        if flag:
+            replacements[image] = os.path.join(subdirectory, file_name)
+    page.change_image_references(replacements)
+    save_to_path(page.html, 'w', os.path.join(storage_path, html_name))

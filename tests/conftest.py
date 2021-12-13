@@ -20,7 +20,7 @@ def create_temp_dir():
 
 @pytest.fixture(scope="session")
 def get_html():
-    file_html = "html/docs-python-org-3-library-venv-html-venv-def.html"
+    file_html = "html/test.html"
     with open(get_fixture_path(file_html)) as file:
         html_text = file.read()
     return html_text

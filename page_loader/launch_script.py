@@ -2,7 +2,7 @@
 import os
 import argparse
 
-from page_loader.loader import download
+from page_loader.loader import copy_html_to_path
 
 current_path = os.getcwd()
 ARGUMENTS = [[('-out', '--output'), {'metavar': 'OUTPUT',
@@ -21,7 +21,7 @@ def prepare_argparse_object():
 
 def main():
     args = prepare_argparse_object().parse_args()
-    download(args.site, args.output)
+    copy_html_to_path(args.site, args.output)
 
 
 if __name__ == '__main__':
