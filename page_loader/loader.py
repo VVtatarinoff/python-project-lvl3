@@ -6,9 +6,6 @@ from fake_useragent import UserAgent
 from page_loader.page import Page
 
 
-CURRENT_DIR = os.getcwd()
-
-
 def generate_file_name(from_path, put_extension=False):
     url_split = re.split(r"[\W]+", from_path)
     url_split = list(filter(truth, url_split))
@@ -43,8 +40,9 @@ def upload_from_web(url, path_to_save=None):
     return True
 
 
-def copy_html_to_path(url, directory):
-    storage_path = os.path.join(CURRENT_DIR, directory)
+def download(url, directory):
+    current_dir = os.getcwd()
+    storage_path = os.path.join(current_dir, directory)
     html_name = generate_file_name(url)
     subdirectory = html_name + "_files"
     html_name = html_name + ".html"

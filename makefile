@@ -1,10 +1,10 @@
 install:
 	poetry install
 page-loader:
-	poetry run page_loader -h
+	poetry run page-loader -h
 
 fake:
-	poetry run page_loader https://www.jetbrains.com/ru-ru/pycharm/whatsnew/ --output tests/
+	poetry run page-loader https://www.jetbrains.com/ru-ru/pycharm/whatsnew/ --output tests/
 tests:
 	poetry run pytest -vv
 
