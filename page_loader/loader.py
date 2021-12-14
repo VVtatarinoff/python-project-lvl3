@@ -1,62 +1,34 @@
 import os
-import re
-import requests
-from operator import truth
-from fake_useragent import UserAgent
 from page_loader.page import Page
-
-
-def generate_file_name(from_path, put_extension=False):
-    url_split = re.split(r"[\W]+", from_path)
-    url_split = list(filter(truth, url_split))
-    if put_extension:
-        extension = url_split.pop()
-        url_split[-1] = f"{url_split[-1]}.{extension}"
-    file_name = '-'.join(url_split[1:])
-    return file_name
-
-
-def save_to_path(content, mode, path):
-    with open(path, mode) as file:
-        file.write(content)
-    print("записан, ", path)
-
-
-def upload_from_web(url, path_to_save=None):
-    ua = UserAgent()
-    headers = {'User-Agent': ua.random}
-    response = requests.get(url, headers=headers)
-    if response.status_code != requests.codes.ok:
-        print("адрес некорректный: ", url)
-        return False
-    content_type = response.headers['content-type']
-    if not path_to_save:
-        return response.content
-    if content_type.lower().startswith('image'):
-        mode = 'wb'
-    else:
-        mode = "w"
-    save_to_path(response.content, mode, path_to_save)
-    return True
+from page_loader.uploader import Uploader
 
 
 def download(url, directory):
+    if not url:
+        return
+    # загружаем и парсим главную страницу
+    html_main = Uploader(url)
+    page_structure = Page(html_main.content, url)
+    # вычисляем ссылки на директории
+    subdirectory = html_main.body_name + '_files'
     current_dir = os.getcwd()
     storage_path = os.path.join(current_dir, directory)
-    html_name = generate_file_name(url)
-    subdirectory = html_name + "_files"
-    html_name = html_name + ".html"
     abs_subdirectory = os.path.join(storage_path, subdirectory)
+    path_to_html = os.path.join(storage_path, html_main.name)
+    # создаем поддиректорию для доменных файлов
     if not os.path.exists(abs_subdirectory):
         os.mkdir(abs_subdirectory)
-    page = Page(upload_from_web(url), url)
-    images = page.image_references
+    # получаем доменные ссылки и выгружаем файлы
+    domain_links = page_structure.link_references
     replacements = dict()
-    for image in images:
-        file_name = generate_file_name(image, put_extension=True)
-        file_path = os.path.join(abs_subdirectory, file_name)
-        flag = upload_from_web(image, file_path)
-        if flag:
-            replacements[image] = os.path.join(subdirectory, file_name)
-    page.change_image_references(replacements)
-    save_to_path(page.html, 'w', os.path.join(storage_path, html_name))
+    for link in domain_links:
+        web_data = Uploader(link)
+        is_success = web_data.save(abs_subdirectory)
+        if is_success:
+            replacements[link] = os.path.join(subdirectory, web_data.name)
+    # подменяем ссылки в html, записываем обновленный файл
+    page_structure.change_links(replacements)
+    html_main.content = page_structure.html
+    is_success = html_main.save(storage_path)
+    if is_success:
+        return path_to_html

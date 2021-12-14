@@ -9,3 +9,6 @@
 
 ## First - loading page and images
 [![asciicast](https://asciinema.org/a/2HhovVO8UqARL3jIbwXp3c8j8.svg)](https://asciinema.org/a/2HhovVO8UqARL3jIbwXp3c8j8)
+
+## Second - loading all domain links
+[![asciicast](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy.svg)](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy)

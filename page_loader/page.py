@@ -3,13 +3,14 @@ import urllib3
 
 
 class Page(BeautifulSoup):
+
+    LINKS_PATTERN = {'img': 'src', 'link': 'href', 'script': 'src'}
+
     def __init__(self, html, url):
-        self.html_initial = html
         self.url = url
         self.parsed = urllib3.util.parse_url(self.url)
         super().__init__(html, "html.parser")
-        self.images = self._get_images()
-        # self.links = self.get_links()
+        self.domain_links = self._get_links()
 
     def _get_domain_path(self, path):
         source_parsed = urllib3.util.parse_url(path)
@@ -23,32 +24,33 @@ class Page(BeautifulSoup):
             normolized_source = source_parsed.url
         return normolized_source
 
-    def _get_images(self):
-        images = dict()
-        for image in self.find_all('img'):
-            source_initial = image['src']
-            normolized_source = self._get_domain_path(source_initial)
-            if not normolized_source:
-                continue
-            previous_images = images.setdefault(normolized_source, [])
-            previous_images.append(image)
-            images[normolized_source] = previous_images
-        return images
+    def _get_links(self):
+        links = dict()
+        for tag, atrr in self.LINKS_PATTERN.items():
+            for item in self.find_all(tag):
+                reference = item.get(atrr)
+                if not reference:
+                    continue
+                normolized_source = self._get_domain_path(reference)
+                if not normolized_source:
+                    continue
+                previous_items = links.setdefault(normolized_source, [])
+                previous_items.append(item)
+                links[normolized_source] = previous_items
+        return links
 
     @property
-    def image_references(self):
-        return set(self.images.keys())
+    def link_references(self):
+        return self.domain_links.keys()
 
-    def change_image_references(self, new_links):
+    def change_links(self, new_links):
         for old_link, new_link in new_links.items():
-            images = self.images[old_link]
-            for image in images:
-                image['src'] = new_link
-        self.images = self._get_images()
+            tags = self.domain_links[old_link]
+            for tag in tags:
+                attr = self.LINKS_PATTERN[tag.name]
+                tag[attr] = new_link
+        self.domain_links = self._get_links()
 
     @property
     def html(self):
         return self.prettify()
-
-    def _get_links(self):
-        pass
