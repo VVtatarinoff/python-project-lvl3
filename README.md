@@ -12,3 +12,6 @@
 
 ## Second - loading all domain links
 [![asciicast](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy.svg)](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy)
+
+## Third - introducing logging
+[![asciicast](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB.svg)](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB)

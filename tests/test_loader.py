@@ -5,16 +5,54 @@ import tempfile
 from bs4 import BeautifulSoup
 
 
-def test_loader(get_html):
+def test_loader(html_check):
     with tempfile.TemporaryDirectory() as temp_dir:
         with requests_mock.Mocker() as m:
-            m.get('https://test.com', headers={'content-type': ' html'},
-                  text=get_html)
-            download('https://test.com', temp_dir)
-            file_name = 'test-com.html'
-            print(os.path.exists(temp_dir))
+            # ссылка на исходную страницу
+            m.get(html_check['url'], headers={'content-type': 'html'},
+                  text=html_check['initial_html'])
+            # ссылка на файл в домене
+            if html_check['text']:
+                m.get(html_check['url_file'],
+                      headers={'content-type':
+                               html_check['content-type']},
+                      text=html_check['text'])
+            else:
+                m.get(html_check['url_file'],
+                      headers={'content-type': html_check['content-type']},
+                      content=html_check['content'])
+            download(html_check['url'], temp_dir)
+            # проверка основго файла
+            file_name = html_check['name_result_file']
             with open(os.path.join(temp_dir, file_name)) as file:
                 text = file.read()
                 created_html = BeautifulSoup(text, "html.parser").prettify()
-            required_html = BeautifulSoup(get_html, "html.parser").prettify()
+            required_html = BeautifulSoup(html_check['result'],
+                                          "html.parser").prettify()
             assert created_html == required_html
+            # проверка файла в *_files директории
+            file_name = html_check['path_to_file']
+            with open(os.path.join(temp_dir, file_name),
+                      html_check['read_mode']) as file:
+                print(html_check['read_mode'])
+                if html_check['read_mode'] == 'r':
+                    assert html_check['text'] == file.read()
+                else:
+                    assert html_check['content'] == file.read()
+
+
+def test_loader_wrong(wrong_html_domin_subadress):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with requests_mock.Mocker() as m:
+            m.get(wrong_html_domin_subadress['url'],
+                  headers={'content-type': 'html'},
+                  text=wrong_html_domin_subadress['html'])
+            m.get(wrong_html_domin_subadress['url_file'],
+                  status_code=wrong_html_domin_subadress['response_code'])
+            download(wrong_html_domin_subadress['url'], temp_dir)
+            directory = os.path.join(temp_dir,
+                                     wrong_html_domin_subadress['directory'])
+            assert os.path.exists(directory)
+            assert len(os.listdir(directory)) == 0
+            file = os.path.join(directory, wrong_html_domin_subadress['file'])
+            assert not os.path.exists(os.path.join(directory, file))

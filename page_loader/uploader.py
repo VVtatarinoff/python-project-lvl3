@@ -2,6 +2,9 @@ import os
 import requests
 from fake_useragent import UserAgent
 from page_loader.naming import Name
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Uploader(object):
@@ -14,8 +17,14 @@ class Uploader(object):
     def load_from_web(self):
         ua = UserAgent()
         headers = {'User-Agent': ua.random}
+        logger.debug(f'request sent to web, adress {self.url}')
         response = requests.get(self.url, headers=headers)
+        logger.debug(f'response recieved from web for adress {self.url},'
+                     ' response staus {response.status_code}')
         if response.status_code != requests.codes.ok:
+            logger.warning(f'file "{self.url}" could not be '
+                           'recieved from web. status '
+                           'code {response.status_code}')
             return None
         content_type = response.headers['content-type'].lower()
         if content_type.startswith('image'):
@@ -30,15 +39,20 @@ class Uploader(object):
 
     def save(self, path):
         if not self.data:
+            logger.warning(f'file "{self.file_name.full_name}"'
+                           ' has no data to save')
             return False
         destination = os.path.join(path, self.file_name.full_name)
         with open(destination, self.mode) as file:
             try:
                 file.write(self.data)
-                print("записан, ", self.file_name.full_name)
             except Exception:
-                print("ОШИБКА ЗАПИСИ ", self.file_name.full_name)
+                logger.warning(f'file "{self.file_name.full_name}"'
+                               ' unable to save to disk')
                 return False
+            else:
+                logger.debug(f'file "{self.file_name.full_name}"'
+                             ' saved to {destination}')
         return True
 
     @property

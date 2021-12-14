@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 import urllib3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Page(BeautifulSoup):
@@ -37,6 +40,7 @@ class Page(BeautifulSoup):
                 previous_items = links.setdefault(normolized_source, [])
                 previous_items.append(item)
                 links[normolized_source] = previous_items
+        logger.debug(f'extracted {len(links)} domain names')
         return links
 
     @property
@@ -44,12 +48,13 @@ class Page(BeautifulSoup):
         return self.domain_links.keys()
 
     def change_links(self, new_links):
+        logger.debug(f'started to rename {len(new_links)} html domain names')
         for old_link, new_link in new_links.items():
             tags = self.domain_links[old_link]
             for tag in tags:
                 attr = self.LINKS_PATTERN[tag.name]
                 tag[attr] = new_link
-        self.domain_links = self._get_links()
+                logger.debug(f'{old_link} CHANGE TO {new_link}')
 
     @property
     def html(self):

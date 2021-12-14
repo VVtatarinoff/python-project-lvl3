@@ -1,14 +1,20 @@
 import os
 from page_loader.page import Page
 from page_loader.uploader import Uploader
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def download(url, directory):
     if not url:
         return
     # загружаем и парсим главную страницу
+    logger.info('loading main html')
     html_main = Uploader(url)
     page_structure = Page(html_main.content, url)
+    logger.info('recieved structure of main html')
     # вычисляем ссылки на директории
     subdirectory = html_main.body_name + '_files'
     current_dir = os.getcwd()
@@ -18,6 +24,9 @@ def download(url, directory):
     # создаем поддиректорию для доменных файлов
     if not os.path.exists(abs_subdirectory):
         os.mkdir(abs_subdirectory)
+        logger.info(f"directory {abs_subdirectory} created")
+    else:
+        logger.info(f"directory {abs_subdirectory} exists, no need to rewrite")
     # получаем доменные ссылки и выгружаем файлы
     domain_links = page_structure.link_references
     replacements = dict()

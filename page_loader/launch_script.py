@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 import argparse
+import logging
+import sys
 
 from page_loader.loader import download
 
@@ -20,8 +22,22 @@ def prepare_argparse_object():
 
 
 def main():
+    logger = logging.getLogger('page_loader')
+    logger.setLevel(logging.DEBUG)
+    fn = logging.FileHandler('page_loader.log', mode='w')
+    formatter = logging.Formatter('%(asctime)s :: %(name)s :'
+                                  ': %(levelname)s :: %(message)s')
+    fn.setFormatter(formatter)
+    fn.setLevel('DEBUG')
+    logger.addHandler(fn)
+    sm = logging.StreamHandler(stream=sys.stdout)
+    sm.setFormatter(formatter)
+    sm.setLevel('DEBUG')
+    logger.addHandler(sm)
+    logger.info("program started")
     args = prepare_argparse_object().parse_args()
-    download(args.site, args.output)
+    result = download(args.site, args.output)
+    logger.info(f'program fininshed, recieved path {result}')
 
 
 if __name__ == '__main__':
