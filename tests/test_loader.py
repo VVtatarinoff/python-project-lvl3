@@ -7,40 +7,25 @@ import tempfile
 from bs4 import BeautifulSoup
 
 
-def test_loader(html_check):
+def test_loader(fake_urls):
     with tempfile.TemporaryDirectory() as temp_dir:
         with requests_mock.Mocker() as m:
             # ссылка на исходную страницу
-            m.get(html_check['url'], headers={'content-type': 'html'},
-                  text=html_check['initial_html'])
-            # ссылка на файл в домене
-            if html_check['text']:
-                m.get(html_check['url_file'],
-                      headers={'content-type':
-                               html_check['content-type']},
-                      text=html_check['text'])
-            else:
-                m.get(html_check['url_file'],
-                      headers={'content-type': html_check['content-type']},
-                      content=html_check['content'])
-            download(html_check['url'], temp_dir)
+            fake_urls.mock_adresses(m.get)()
+            download(fake_urls.url, temp_dir)
             # проверка основго файла
-            file_name = html_check['name_result_file']
+            file_name = fake_urls.path_to_saved_page
             with open(os.path.join(temp_dir, file_name)) as file:
                 text = file.read()
-                created_html = BeautifulSoup(text, "html.parser").prettify()
-            required_html = BeautifulSoup(html_check['result'],
+            created_html = BeautifulSoup(text, "html.parser").prettify()
+            required_html = BeautifulSoup(fake_urls.modified_html,
                                           "html.parser").prettify()
             assert created_html == required_html
             # проверка файла в *_files директории
-            file_name = html_check['path_to_file']
+            file_name = fake_urls.path_to_saved_file
             with open(os.path.join(temp_dir, file_name),
-                      html_check['read_mode']) as file:
-                print(html_check['read_mode'])
-                if html_check['read_mode'] == 'r':
-                    assert html_check['text'] == file.read()
-                else:
-                    assert html_check['content'] == file.read()
+                      fake_urls.mode) as file:
+                assert fake_urls.content == file.read()
 
 
 def test_loader_wrong(wrong_html_domain_subadress):
@@ -60,14 +45,13 @@ def test_loader_wrong(wrong_html_domain_subadress):
             assert not os.path.exists(os.path.join(directory, file))
 
 
-def test_no_directory(html_check):
+def test_no_directory(fake_urls):
     with tempfile.TemporaryDirectory() as temp_dir:
         wrong_dir = os.path.join(temp_dir, '/test')
         with pytest.raises(Exception) as excinfo:
             with requests_mock.Mocker() as m:
                 # ссылка на исходную страницу
-                m.get(html_check['url'], headers={'content-type': 'html'},
-                      text=html_check['initial_html'])
-                download(html_check['url'], wrong_dir)
+                fake_urls.mock_adresses(m.get)()
+                download(fake_urls.url, wrong_dir)
         print(sys.exc_info())
         assert 'NoDirectory' in str(excinfo)

@@ -1,6 +1,6 @@
 import os
 import logging
-
+from progress.bar import Bar
 from page_loader.page import Page
 from page_loader.uploader import Uploader
 from page_loader.errors import NoDirectory, NoContent
@@ -47,10 +47,13 @@ def download(url, directory):  # noqa C901
     # получаем доменные ссылки и выгружаем файлы
     domain_links = page_structure.link_references
     replacements = dict()
+    bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:
         web_data = Uploader(link)
-        is_success = web_data.save(abs_subdirectory)
-        if is_success:
+        web_data.save(abs_subdirectory)
+        bar.next()
+        print(' ', link)
+        if web_data:
             replacements[link] = os.path.join(subdirectory, web_data.name)
 
     # подменяем ссылки в html, записываем обновленный файл
@@ -58,8 +61,11 @@ def download(url, directory):  # noqa C901
     logger.debug('generating updated HTML')
     html_main.content = page_structure.html
     logger.debug('saving updated HTML')
-    is_success = html_main.save(storage_path)
-    if is_success:
+    html_main.save(storage_path)
+    bar.next()
+    print(' ', html_main.name)
+    bar.finish()
+    if html_main:
         return path_to_html
     else:
         logger.critical('unable to save updated HTML to file')

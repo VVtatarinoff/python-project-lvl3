@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import urllib3
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 

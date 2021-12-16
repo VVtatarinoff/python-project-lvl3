@@ -16,6 +16,7 @@ class Uploader(object):
         self.file_name = Name(url)
         self.mode = 'w'
         self.data = self.load_from_web()
+        self.saved = False
 
     def load_from_web(self):
         ua = UserAgent()
@@ -53,7 +54,7 @@ class Uploader(object):
         if not self.data:
             logger.critical(f'file "{self.file_name.full_name}"'
                             ' has no data to save')
-            return False
+            return
         destination = os.path.join(path, self.file_name.full_name)
         with open(destination, self.mode) as file:
             try:
@@ -61,11 +62,11 @@ class Uploader(object):
             except Exception:
                 logger.critical(f'file "{self.file_name.full_name}"'
                                 ' unable to save to disk')
-                return False
+                return
             else:
                 logger.debug(f'file "{self.file_name.full_name}"'
                              f' saved to {destination}')
-        return True
+                self.saved = True
 
     @property
     def content(self):
@@ -82,3 +83,6 @@ class Uploader(object):
     @property
     def body_name(self):
         return self.file_name.body_name
+
+    def __bool__(self):
+        return self.saved

@@ -5,35 +5,46 @@ from tests.fixtures.test_data import PNG_LOAD_PATHS
 from tests.fixtures.test_data import CSS_LOAD_PATHS
 
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-ATTR_TO_LOAD = {'initial_html', 'result', 'file_directory'}
+class FakeRequest(object):
+    def __init__(self, data_paths):
+        self.mode = data_paths['read_mode']
+        self.content = self.get_data(data_paths['file_directory'], self.mode)
+        self.initital_html = self.get_data(data_paths['initial_html'])
+        self.modified_html = self.get_data(data_paths['result'])
+        self.url = data_paths['url']
+        self.url_file = data_paths['url_file']
+        self.path_to_saved_file = data_paths['path_to_file']
+        self.path_to_saved_page = data_paths['name_result_file']
+        self.file_type = data_paths['content-type']
 
+    def get_fixture_path(self, file_name):
+        current = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(current, 'fixtures', file_name)
 
-def get_fixture_path(file_name):
-    return os.path.join(CURRENT_DIR, 'fixtures', file_name)
+    def get_data(self, path, mode="r"):
+        path = self.get_fixture_path(path)
+        with open(path, mode) as file:
+            data = file.read()
+        return data
+
+    def mock_adresses(self, func):
+        def inner():
+            func(self.url, headers={'content-type': 'html'},
+                 text=self.initital_html)
+            if self.mode == 'r':
+                func(self.url_file, headers={'content-type': self.file_type},
+                     text=self.content)
+            else:
+                func(self.url_file, headers={'content-type': self.file_type},
+                     content=self.content)
+        return inner
 
 
 @pytest.fixture(scope="session", params=(HTML_LOAD_PATHS,
                                          PNG_LOAD_PATHS,
                                          CSS_LOAD_PATHS))
-def html_check(request):
-    data = dict()
-    data['text'] = ""
-    data['content'] = None
-    for attr in request.param:
-        if attr in ATTR_TO_LOAD:
-            full_path = get_fixture_path(request.param[attr])
-            if attr == 'file_directory':
-                mode = request.param['read_mode']
-                attr_name = 'content' if mode == "rb" else 'text'
-                with open(full_path, mode) as file:
-                    data[attr_name] = file.read()
-            else:
-                with open(full_path) as file:
-                    data[attr] = file.read()
-        else:
-            data[attr] = request.param[attr]
-    return data
+def fake_urls(request):
+    return FakeRequest(request.param)
 
 
 @pytest.fixture(scope="session")
