@@ -54,7 +54,7 @@ class Page(BeautifulSoup):
             for tag in tags:
                 attr = self.LINKS_PATTERN[tag.name]
                 tag[attr] = new_link
-                logger.debug(f'{old_link} CHANGE TO {new_link}')
+                logger.debug(f'{old_link} CHANGED TO {new_link}')
 
     @property
     def html(self):

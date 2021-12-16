@@ -15,3 +15,6 @@
 
 ## Third - introducing logging
 [![asciicast](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB.svg)](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB)
+
+## Forth - introducing errors handling
+[![asciicast](https://asciinema.org/a/O4QZOerAYyFGsOjqjznLjU3Ld.svg)](https://asciinema.org/a/O4QZOerAYyFGsOjqjznLjU3Ld)

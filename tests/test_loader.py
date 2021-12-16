@@ -1,5 +1,7 @@
 import requests_mock
+import pytest
 import os
+import sys
 from page_loader.loader import download
 import tempfile
 from bs4 import BeautifulSoup
@@ -41,18 +43,31 @@ def test_loader(html_check):
                     assert html_check['content'] == file.read()
 
 
-def test_loader_wrong(wrong_html_domin_subadress):
+def test_loader_wrong(wrong_html_domain_subadress):
     with tempfile.TemporaryDirectory() as temp_dir:
         with requests_mock.Mocker() as m:
-            m.get(wrong_html_domin_subadress['url'],
+            m.get(wrong_html_domain_subadress['url'],
                   headers={'content-type': 'html'},
-                  text=wrong_html_domin_subadress['html'])
-            m.get(wrong_html_domin_subadress['url_file'],
-                  status_code=wrong_html_domin_subadress['response_code'])
-            download(wrong_html_domin_subadress['url'], temp_dir)
+                  text=wrong_html_domain_subadress['html'])
+            m.get(wrong_html_domain_subadress['url_file'],
+                  status_code=wrong_html_domain_subadress['response_code'])
+            download(wrong_html_domain_subadress['url'], temp_dir)
             directory = os.path.join(temp_dir,
-                                     wrong_html_domin_subadress['directory'])
+                                     wrong_html_domain_subadress['directory'])
             assert os.path.exists(directory)
             assert len(os.listdir(directory)) == 0
-            file = os.path.join(directory, wrong_html_domin_subadress['file'])
+            file = os.path.join(directory, wrong_html_domain_subadress['file'])
             assert not os.path.exists(os.path.join(directory, file))
+
+
+def test_no_directory(html_check):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        wrong_dir = os.path.join(temp_dir, '/test')
+        with pytest.raises(Exception) as excinfo:
+            with requests_mock.Mocker() as m:
+                # ссылка на исходную страницу
+                m.get(html_check['url'], headers={'content-type': 'html'},
+                      text=html_check['initial_html'])
+                download(html_check['url'], wrong_dir)
+        print(sys.exc_info())
+        assert 'NoDirectory' in str(excinfo)

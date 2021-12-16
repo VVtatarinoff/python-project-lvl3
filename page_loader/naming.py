@@ -28,6 +28,7 @@ class Name(object):
             extension = '.' + split[-1]
             self.path = self.path[:-len(extension)]
             return extension
+        logger.info(f'for {self.path} extension could not be extracted')
         return ""
 
     def create_short_name(self):
@@ -51,5 +52,5 @@ class Name(object):
     @extension.setter
     def extension(self, new_extension):
         logger.debug(f'for {self.short_name} extension '
-                     '"{self._extension}" replaced by "{new_extension}"')
+                     f'"{self._extension}" replaced by "{new_extension}"')
         self._extension = new_extension

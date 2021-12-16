@@ -37,7 +37,7 @@ def html_check(request):
 
 
 @pytest.fixture(scope="session")
-def wrong_html_domin_subadress():
+def wrong_html_domain_subadress():
     result = {
         'html': """<html>
     <head>
