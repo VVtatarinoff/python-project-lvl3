@@ -7,14 +7,17 @@
 
 ### Videos captured the running scenarios
 
-## First - loading page and images
+## 1st - loading page and images
 [![asciicast](https://asciinema.org/a/2HhovVO8UqARL3jIbwXp3c8j8.svg)](https://asciinema.org/a/2HhovVO8UqARL3jIbwXp3c8j8)
 
-## Second - loading all domain links
+## 2nd - loading all domain links
 [![asciicast](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy.svg)](https://asciinema.org/a/XguMARmUR2sq3WoFgDOgAGhgy)
 
-## Third - introducing logging
+## 3rd - introducing logging
 [![asciicast](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB.svg)](https://asciinema.org/a/K9bLLT7h9wvUysIw8mQfEflaB)
 
-## Forth - introducing errors handling
+## 4th - introducing errors handling
 [![asciicast](https://asciinema.org/a/O4QZOerAYyFGsOjqjznLjU3Ld.svg)](https://asciinema.org/a/O4QZOerAYyFGsOjqjznLjU3Ld)
+
+## 5th - visualization of progress
+[![asciicast](https://asciinema.org/a/Qvz09a9JaelAwcmFHLk4AJtC1.svg)](https://asciinema.org/a/Qvz09a9JaelAwcmFHLk4AJtC1)

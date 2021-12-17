@@ -4,7 +4,7 @@ import logging
 
 from fake_useragent import UserAgent
 from page_loader.naming import Name
-from page_loader.errors import NoConnection
+from page_loader.errors import NoConnection, NoDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,9 @@ class Uploader(object):
                             ' has no data to save')
             return
         destination = os.path.join(path, self.file_name.full_name)
+        if not os.path.exists(path):
+            logger.critical(f"directory '{path}' doesn't exist")
+            raise NoDirectory(f"{path} doesn't exist")
         with open(destination, self.mode) as file:
             try:
                 file.write(self.data)

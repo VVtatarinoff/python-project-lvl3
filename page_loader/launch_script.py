@@ -46,7 +46,6 @@ def main():
     try:
         result = download(args.site, args.output)
     except MyError:
-        # logger.critical(f'program finished with known error {MyError}')
         Error_class, Error_instanse, trace = sys.exc_info()
         # print(str(trace.tb_next))
         # print(sys.last_traceback)

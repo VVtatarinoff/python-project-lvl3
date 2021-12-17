@@ -3,6 +3,7 @@ import pytest
 from tests.fixtures.test_data import HTML_LOAD_PATHS
 from tests.fixtures.test_data import PNG_LOAD_PATHS
 from tests.fixtures.test_data import CSS_LOAD_PATHS
+from tests.fixtures.naming_data import NAMES
 
 
 class FakeRequest(object):
@@ -62,3 +63,8 @@ def wrong_html_domain_subadress():
         'file': 'www-post-com-course.html',
         'response_code': '404'}
     return result
+
+
+@pytest.fixture(scope="session", params=NAMES)
+def name_matching(request):
+    return request.param

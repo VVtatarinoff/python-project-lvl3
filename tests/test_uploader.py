@@ -17,4 +17,4 @@ def test_loader_wrong_path(fake_urls):
             fake_urls.mock_adresses(m.get)()
             test_wrong = Uploader(fake_urls.url)
             test_wrong.save('/asdadaasd')
-        assert 'FileNotFoundError' in str(excinfo)
+        assert 'NoDirectory' in str(excinfo)
