@@ -1,4 +1,5 @@
 import requests_mock
+import requests
 import pytest
 import os
 import sys
@@ -32,7 +33,7 @@ def test_loader_wrong(wrong_html_domain_subadress):
     with tempfile.TemporaryDirectory() as temp_dir:
         with requests_mock.Mocker() as m:
             m.get(wrong_html_domain_subadress['url'],
-                  headers={'content-type': 'html'},
+                  headers={'content-type': 'text/html'},
                   text=wrong_html_domain_subadress['html'])
             m.get(wrong_html_domain_subadress['url_file'],
                   status_code=wrong_html_domain_subadress['response_code'])
@@ -55,3 +56,13 @@ def test_no_directory(fake_urls):
                 download(fake_urls.url, wrong_dir)
         print(sys.exc_info())
         assert 'NoDirectory' in str(excinfo)
+
+
+def test_no_page(fake_urls):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with pytest.raises(Exception) as excinfo:
+            with requests_mock.Mocker() as m:
+                m.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
+                download(fake_urls.url, temp_dir)
+        print(sys.exc_info())
+        assert 'NoConnection' in str(excinfo)

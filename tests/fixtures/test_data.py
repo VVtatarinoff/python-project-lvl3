@@ -7,7 +7,7 @@ HTML_LOAD_PATHS = {'url': 'https://test_html/',
                    'name_result_file': 'test-html.html',
                    'file_directory': 'test_html_subfile/test-html-courses.html',
                    'read_mode': 'r',
-                   'content-type': 'html'}
+                   'content-type': 'text/html; charset=utf-8'}
 
 PNG_LOAD_PATHS = {'url': 'https://test_png/',
                   'url_file': 'https://test_png/nodejs.png',
@@ -33,4 +33,4 @@ CSS_LOAD_PATHS = {'url': 'https://test_css/',
                   'file_directory': 'test_css_subfile/test-css-'
                   'assets-application.css',
                   'read_mode': 'r',
-                  'content-type': 'application/css'}
+                  'content-type': 'text/css; charset=utf-8'}

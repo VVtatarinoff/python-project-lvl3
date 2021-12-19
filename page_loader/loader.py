@@ -5,6 +5,7 @@ from page_loader.page import Page
 from page_loader.uploader import Uploader
 from page_loader.errors import NoDirectory, NoContent
 from page_loader.errors import FileSaveError
+from page_loader.naming import ConvertUrlToName
 
 
 logger = logging.getLogger(__name__)
@@ -27,15 +28,17 @@ def download(url, directory):  # noqa C901
     logger.debug(f'recieved content type for main page'
                  f'{type(html_main.content)}')
     if not html_main.content:
-        logger.critical(f'unable to html from {url}')
+        logger.critical(f'unable to get html from {url}')
         raise NoContent
     page_structure = Page(html_main.content, url)
     logger.debug('recieved structure of main html')
+    page_file_name = ConvertUrlToName(url, html_main.mime)
+    logger.debug(f'recieved name of  main html {page_file_name.full_name}')
 
     # вычисляем ссылки на директории
-    subdirectory = html_main.body_name + '_files'
+    subdirectory = page_file_name.body_name + '_files'
     abs_subdirectory = os.path.join(storage_path, subdirectory)
-    path_to_html = os.path.join(storage_path, html_main.name)
+    path_to_html = os.path.join(storage_path, page_file_name.full_name)
 
     # создаем поддиректорию для доменных файлов
     if not os.path.exists(abs_subdirectory):
@@ -50,22 +53,22 @@ def download(url, directory):  # noqa C901
     bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:
         web_data = Uploader(link)
-        web_data.save(abs_subdirectory)
+        file_name = ConvertUrlToName(link, web_data.mime).full_name
+        web_data.save(os.path.join(abs_subdirectory, file_name))
         bar.next()
         print(' ', link)
-        if web_data:
-            replacements[link] = os.path.join(subdirectory, web_data.name)
+        if web_data.saved:
+            replacements[link] = os.path.join(subdirectory, file_name)
 
     # подменяем ссылки в html, записываем обновленный файл
     page_structure.change_links(replacements)
     logger.debug('generating updated HTML')
     html_main.content = page_structure.html
     logger.debug('saving updated HTML')
-    html_main.save(storage_path)
+    html_main.save(path_to_html)
     bar.next()
-    print(' ', html_main.name)
     bar.finish()
-    if html_main:
+    if html_main.saved:
         return path_to_html
     else:
         logger.critical('unable to save updated HTML to file')

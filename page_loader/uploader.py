@@ -1,27 +1,25 @@
-import os
 import requests
 import logging
 
+
 from fake_useragent import UserAgent
-from page_loader.naming import Name
-from page_loader.errors import NoConnection, NoDirectory
+from page_loader.errors import NoConnection
 
 logger = logging.getLogger(__name__)
 
 
 class Uploader(object):
     def __init__(self, url):
-        self.status_code = None
         self.url = url
-        self.file_name = Name(url)
-        self.mode = 'w'
+        self.mime = None
+        self.is_text = False
         self.data = self.load_from_web()
         self.saved = False
 
     def load_from_web(self):
         ua = UserAgent()
-        headers = {'User-Agent': ua.random}
-        logger.debug(f'request sent to web, adress {self.url}')
+        headers = {'User-Agent': ua.random, 'Accept-Encoding': None}
+        logger.debug(f'request sent to web, URL: {self.url}')
 
         try:
             response = requests.get(self.url, headers=headers)
@@ -29,46 +27,39 @@ class Uploader(object):
             logger.critical(f'{self.url} raises connection error')
             raise NoConnection
         else:
-            self.status_code = response.status_code
-            logger.debug(f'response recieved from web for adress {self.url},'
-                         f' response status {self.status_code}')
-
-        if self.status_code != requests.codes.ok:
+            status_code = response.status_code
+        if status_code != requests.codes.ok:
             logger.critical(f'file "{self.url}" could not be '
-                            'recieved from web. status '
-                            f'code {self.status_code}')
+                            'recieved from web. Status '
+                            f'code {status_code}')
             return None
-
-        content_type = response.headers['content-type'].lower()
-        if content_type.startswith('image'):
-            self.mode = 'wb'
-            return response.content
-        # корректируем расширение файла, т.к. по названию
-        # не всегда видно что возвращается страница html
-        if content_type.find('html') >= 0:
-            self.file_name.extension = '.html'
-        self.mode = "w"
-        return response.text
+        content_types = response.headers['content-type'].split(';')
+        self.mime = content_types[0].lower()
+        self.is_text = True if self.mime.startswith('text') else False
+        logger.debug(f'response recieved from web for address {self.url},'
+                     f' response status {status_code}, '
+                     f'content type {self.mime}')
+        logger.debug(f'self.mime_text = {self.is_text}')
+        if self.is_text:
+            return response.text
+        return response.content
 
     def save(self, path):
         if not self.data:
-            logger.critical(f'file "{self.file_name.full_name}"'
+            logger.critical(f'file "{path}"'
                             ' has no data to save')
             return
-        destination = os.path.join(path, self.file_name.full_name)
-        if not os.path.exists(path):
-            logger.critical(f"directory '{path}' doesn't exist")
-            raise NoDirectory(f"{path} doesn't exist")
-        with open(destination, self.mode) as file:
+        mode = 'w' if self.is_text else 'wb'
+        with open(path, mode) as file:
             try:
                 file.write(self.data)
             except Exception:
-                logger.critical(f'file "{self.file_name.full_name}"'
+                logger.critical(f'file "{path}", mode {mode}'
                                 ' unable to save to disk')
-                return
+                raise Exception
             else:
-                logger.debug(f'file "{self.file_name.full_name}"'
-                             f' saved to {destination}')
+                logger.debug(f'file '
+                             f' saved to {path}')
                 self.saved = True
 
     @property
@@ -78,14 +69,3 @@ class Uploader(object):
     @content.setter
     def content(self, data):
         self.data = data
-
-    @property
-    def name(self):
-        return self.file_name.full_name
-
-    @property
-    def body_name(self):
-        return self.file_name.body_name
-
-    def __bool__(self):
-        return self.saved

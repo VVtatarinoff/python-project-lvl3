@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import os
 import argparse
-import logging
 import sys
+from page_loader import init_logger
 
 from page_loader.loader import download
 from page_loader.errors import MyError
 
 current_path = os.getcwd()
 ARGUMENTS = [[('-o', '--output'), {'metavar': '[dir]',
-                                   'help': 'output dir (default: "/app")',
+                                   'help': 'output dir'
+                                   f'(default: {current_path})',
                                    'default': current_path, }],
-             [('site', ), {'help': 'url link to website'}]]
+             [('url', ), {'help': 'url link to website'}]]
 
 
 def prepare_argparse_object():
@@ -22,34 +23,15 @@ def prepare_argparse_object():
     return parser
 
 
-def init_logger():
-    logger = logging.getLogger('page_loader')
-    logger.setLevel(logging.DEBUG)
-    fn = logging.FileHandler('logs/page_loader.log', mode='w')
-    formatter = logging.Formatter('%(asctime)s :: %(name)s :'
-                                  ': %(levelname)s :: %(message)s')
-    fn.setFormatter(formatter)
-    fn.setLevel('DEBUG')
-    logger.addHandler(fn)
-    sm = logging.StreamHandler(stream=sys.stderr)
-    sm.setFormatter(formatter)
-    sm.setLevel('CRITICAL')
-    logger.addHandler(sm)
-    return logger
-
-
 def main():
     logger = init_logger()
     logger.info("program started")
     args = prepare_argparse_object().parse_args()
     n = 0
     try:
-        result = download(args.site, args.output)
+        result = download(args.url, args.output)
     except MyError:
-        Error_class, Error_instanse, trace = sys.exc_info()
-        # print(str(trace.tb_next))
-        # print(sys.last_traceback)
-        print(f'unable to upload {args.site}')
+        print(f'unable to upload {args.url}')
         n = 1
         logger.exception(msg=f'Unable to download {args.site}')
 

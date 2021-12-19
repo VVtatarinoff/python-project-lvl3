@@ -22,6 +22,8 @@ class Page(BeautifulSoup):
         if source_parsed.scheme:
             if source_parsed.host != self.parsed.host:
                 normolized_source = None
+            else:
+                normolized_source = path
         else:
             source_parsed = source_parsed._replace(scheme=self.parsed.scheme)
             source_parsed = source_parsed._replace(host=self.parsed.host)

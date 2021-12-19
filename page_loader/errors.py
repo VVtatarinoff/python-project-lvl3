@@ -15,6 +15,9 @@ class NoConnection(MyError):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+    def __str__(self):
+        return "Could not establish web connection"
+
 
 class NoContent(MyError):
     def __init__(self, *args: object) -> None:

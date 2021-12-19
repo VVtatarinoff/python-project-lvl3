@@ -30,7 +30,7 @@ class FakeRequest(object):
 
     def mock_adresses(self, func):
         def inner():
-            func(self.url, headers={'content-type': 'html'},
+            func(self.url, headers={'content-type': 'text/html; charset=utf-8'},
                  text=self.initital_html)
             if self.mode == 'r':
                 func(self.url_file, headers={'content-type': self.file_type},
