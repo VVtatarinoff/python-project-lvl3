@@ -32,7 +32,7 @@ class Uploader(object):
         self.url = url
         self.directory = directory
         self._file_name = file_name
-        self._mime = None
+        self._mime = ''
         self.saved = False
 
     def _send_request(self, stream=True):
@@ -53,8 +53,9 @@ class Uploader(object):
         return response
 
     def _check_response(self, response):
-        content_types = response.headers['content-type'].split(';')
-        self._mime = content_types[0].lower()
+        if 'content-type' in response.headers:
+            content_types = response.headers['content-type'].split(';')
+            self._mime = content_types[0].lower()
         if not self._file_name:
             self._file_name = ConvertUrlToName(self.url, self._mime).full_name
         logger.debug(f'response received from web for address {self.url},'
