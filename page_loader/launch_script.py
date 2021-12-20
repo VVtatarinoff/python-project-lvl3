@@ -33,7 +33,7 @@ def main():
     except MyError:
         print(f'unable to upload {args.url}')
         n = 1
-        logger.exception(msg=f'Unable to download {args.site}')
+        logger.exception(msg=f'Unable to download {args.url}')
 
     except Exception:
         logger.critical(f'program finished with  error {Exception}')

@@ -30,13 +30,16 @@ class FakeRequest(object):
 
     def mock_adresses(self, func):
         def inner():
-            func(self.url, headers={'content-type': 'text/html; charset=utf-8'},
+            func(self.url, headers={'content-type': 'text/html; charset=utf-8',
+                                    'content-length': '100'},
                  text=self.initital_html)
             if self.mode == 'r':
-                func(self.url_file, headers={'content-type': self.file_type},
+                func(self.url_file, headers={'content-type': self.file_type,
+                                             'content-length': '100'},
                      text=self.content)
             else:
-                func(self.url_file, headers={'content-type': self.file_type},
+                func(self.url_file, headers={'content-type': self.file_type,
+                                             'content-length': '100'},
                      content=self.content)
         return inner
 
@@ -49,7 +52,7 @@ def fake_urls(request):
 
 
 @pytest.fixture(scope="session")
-def wrong_html_domain_subadress():
+def wrong_domain_subadress():
     result = {
         'html': """<html>
     <head>
@@ -61,7 +64,7 @@ def wrong_html_domain_subadress():
         'directory': 'www-post-com_files',
         'main-file': 'www-post-com.html',
         'file': 'www-post-com-course.html',
-        'response_code': '404'}
+        'response_code': 404}
     return result
 
 

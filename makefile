@@ -5,7 +5,7 @@ page-loader:
 	poetry run page-loader -h
 
 fake:
-	poetry run page-loader https://www.jetbrains.com/ru-ru/pycharm/whatsnew/ --output tests/
+	poetry run page-loader https://www.jetbrains.com/ru-ru/pycharm/whatsnew/ --output tests/temp
 
 hexlet:
 	poetry run page-loader -o tests/temp https://page-loader.hexlet.repl.co/

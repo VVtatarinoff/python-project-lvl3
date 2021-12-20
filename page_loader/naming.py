@@ -47,7 +47,3 @@ class ConvertUrlToName(object):
     @property
     def full_name(self):
         return self.short_name + self._suffix
-
-    @property
-    def body_name(self):
-        return self.short_name

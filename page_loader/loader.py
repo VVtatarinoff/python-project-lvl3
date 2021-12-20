@@ -4,41 +4,57 @@ from progress.bar import Bar
 from page_loader.page import Page
 from page_loader.uploader import Uploader
 from page_loader.errors import NoDirectory, NoContent
-from page_loader.errors import FileSaveError
-from page_loader.naming import ConvertUrlToName
+from page_loader.errors import FileSaveError, MyError
 
 
 logger = logging.getLogger(__name__)
 
 
-def download(url, directory):  # noqa C901
+def load_html_file(path):
+    with open(path) as file:
+        content = file.read()
+    return content
+
+
+def save_html_file(content, path):
+    with open(path, 'w') as file:
+        file.write(content)
+    return os.path.getsize(path)
+
+
+def get_html(url, path_to_save):
     if not url:
         logger.critical('url to upload is empty')
-        return
+        raise MyError
+    if not os.path.exists(path_to_save):
+        logger.critical(f"directory '{path_to_save}' doesn't exist")
+        raise NoDirectory(f"{path_to_save} doesn't exist")
+    logger.debug('loading main html')
+    html_load = Uploader(url, directory=path_to_save)
+    html_load.load_from_web()
+    if html_load.mime.startswith('html'):
+        raise NoContent
+    if not html_load.saved:
+        raise FileSaveError
+    page_file_name = html_load.file_name
+    logger.debug(f'recieved name of  main html {page_file_name}')
+    html_content = load_html_file(os.path.join(path_to_save, page_file_name))
+    return html_content, page_file_name
+
+
+def download(url, directory):  # noqa C901
     current_dir = os.getcwd()
     storage_path = os.path.join(current_dir, directory)
 
-    if not os.path.exists(storage_path):
-        logger.critical(f"directory '{storage_path}' doesn't exist")
-        raise NoDirectory(f"{storage_path} doesn't exist")
-
-    # загружаем и парсим главную страницу
-    logger.debug('loading main html')
-    html_main = Uploader(url)
-    logger.debug(f'recieved content type for main page'
-                 f'{type(html_main.content)}')
-    if not html_main.content:
-        logger.critical(f'unable to get html from {url}')
-        raise NoContent
-    page_structure = Page(html_main.content, url)
+    # загружаем главную страницу
+    html_content, page_file_name = get_html(url, directory)
+    path_to_html = os.path.join(storage_path, page_file_name)
+    page_structure = Page(html_content, url)
     logger.debug('recieved structure of main html')
-    page_file_name = ConvertUrlToName(url, html_main.mime)
-    logger.debug(f'recieved name of  main html {page_file_name.full_name}')
 
     # вычисляем ссылки на директории
-    subdirectory = page_file_name.body_name + '_files'
+    subdirectory = page_file_name.replace('.html', '_files')
     abs_subdirectory = os.path.join(storage_path, subdirectory)
-    path_to_html = os.path.join(storage_path, page_file_name.full_name)
 
     # создаем поддиректорию для доменных файлов
     if not os.path.exists(abs_subdirectory):
@@ -50,26 +66,26 @@ def download(url, directory):  # noqa C901
     # получаем доменные ссылки и выгружаем файлы
     domain_links = page_structure.link_references
     replacements = dict()
+    total_size = 0
     bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:
-        web_data = Uploader(link)
-        file_name = ConvertUrlToName(link, web_data.mime).full_name
-        web_data.save(os.path.join(abs_subdirectory, file_name))
-        bar.next()
-        print(' ', link)
+        web_data = Uploader(link, abs_subdirectory)
+        web_data.load_from_web()
         if web_data.saved:
+            file_name = web_data.file_name
             replacements[link] = os.path.join(subdirectory, file_name)
+        bar.next()
+        total_size += web_data.size
+        print(' ', link, f'size: {web_data.size}')
 
     # подменяем ссылки в html, записываем обновленный файл
     page_structure.change_links(replacements)
     logger.debug('generating updated HTML')
-    html_main.content = page_structure.html
+    html_size = save_html_file(page_structure.html, path_to_html)
     logger.debug('saving updated HTML')
-    html_main.save(path_to_html)
     bar.next()
+    print(' ', url, f'size: {html_size}')
     bar.finish()
-    if html_main.saved:
-        return path_to_html
-    else:
-        logger.critical('unable to save updated HTML to file')
-        raise FileSaveError
+    total_size += html_size
+    print(f'Total bytes saved: {total_size}')
+    return path_to_html

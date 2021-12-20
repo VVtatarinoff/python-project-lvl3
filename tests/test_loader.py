@@ -29,21 +29,24 @@ def test_loader(fake_urls):
                 assert fake_urls.content == file.read()
 
 
-def test_loader_wrong(wrong_html_domain_subadress):
+def test_loader_wrong(wrong_domain_subadress):
     with tempfile.TemporaryDirectory() as temp_dir:
-        with requests_mock.Mocker() as m:
-            m.get(wrong_html_domain_subadress['url'],
-                  headers={'content-type': 'text/html'},
-                  text=wrong_html_domain_subadress['html'])
-            m.get(wrong_html_domain_subadress['url_file'],
-                  status_code=wrong_html_domain_subadress['response_code'])
-            download(wrong_html_domain_subadress['url'], temp_dir)
-            directory = os.path.join(temp_dir,
-                                     wrong_html_domain_subadress['directory'])
-            assert os.path.exists(directory)
-            assert len(os.listdir(directory)) == 0
-            file = os.path.join(directory, wrong_html_domain_subadress['file'])
-            assert not os.path.exists(os.path.join(directory, file))
+        with pytest.raises(Exception) as excinfo:
+            with requests_mock.Mocker() as m:
+                m.get(wrong_domain_subadress['url'],
+                      headers={'content-type': 'text/html',
+                               'content-length': '100'},
+                      text=wrong_domain_subadress['html'])
+                m.get(wrong_domain_subadress['url_file'],
+                      status_code=wrong_domain_subadress['response_code'])
+                download(wrong_domain_subadress['url'], temp_dir)
+                directory = os.path.join(temp_dir,
+                                         wrong_domain_subadress['directory'])
+                assert os.path.exists(directory)
+                assert len(os.listdir(directory)) == 0
+                file = os.path.join(directory, wrong_domain_subadress['file'])
+                assert not os.path.exists(os.path.join(directory, file))
+            assert 'NoConnection' in str(excinfo)
 
 
 def test_no_directory(fake_urls):
