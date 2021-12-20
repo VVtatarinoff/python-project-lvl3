@@ -28,7 +28,7 @@ class Uploader(object):
                  file_name=None, max_size=1024 * 1024 * 20):
         self.CHUNK_SIZE = 1024
         self.max_size = max_size
-        self._size = 0
+        self._size = 1
         self.url = url
         self.directory = directory
         self._file_name = file_name
