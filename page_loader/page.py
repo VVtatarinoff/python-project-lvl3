@@ -8,6 +8,11 @@ logger = logging.getLogger(__name__)
 
 class Page(BeautifulSoup):
 
+    """
+    Экземпляр класса - объект Beutifulsoup с возможностью выделения
+    ссылок на доменные ресурсы и замена их на ссылки,
+    переданные в аргументоах
+    """
     LINKS_PATTERN = {'img': 'src', 'link': 'href', 'script': 'src'}
 
     def __init__(self, html, url):

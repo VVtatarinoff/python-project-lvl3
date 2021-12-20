@@ -9,6 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class ConvertUrlToName(object):
+    """
+    конвертация URL в имя. Для большей точности определения суффикса
+    может быть передан MIME из HTTP запроса.
+    """
     def __init__(self, url, mime=''):
         parse = parse_url(url)
         if parse.path:
