@@ -34,7 +34,7 @@ class ConvertUrlToName(object):
             return '.html' if not predefined_suffix else predefined_suffix
         suffix = pathlib.PurePath(self.path).suffix
         if not suffix and not predefined_suffix:
-            return ''
+            return '.html'
         if suffix == predefined_suffix or not predefined_suffix:
             self.path = self.path[:-len(suffix)]
         else:
