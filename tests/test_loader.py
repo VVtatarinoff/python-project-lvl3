@@ -46,7 +46,7 @@ def test_loader_wrong(wrong_domain_subadress):
                 assert len(os.listdir(directory)) == 0
                 file = os.path.join(directory, wrong_domain_subadress['file'])
                 assert not os.path.exists(os.path.join(directory, file))
-            assert 'NoConnection' in str(excinfo)
+            assert 'MyError' in str(excinfo)
 
 
 def test_no_directory(fake_urls):
@@ -58,7 +58,7 @@ def test_no_directory(fake_urls):
                 fake_urls.mock_adresses(m.get)()
                 download(fake_urls.url, wrong_dir)
         print(sys.exc_info())
-        assert 'NoDirectory' in str(excinfo)
+        assert 'MyError' in str(excinfo)
 
 
 def test_no_page(fake_urls):
@@ -68,4 +68,4 @@ def test_no_page(fake_urls):
                 m.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
                 download(fake_urls.url, temp_dir)
         print(sys.exc_info())
-        assert 'NoConnection' in str(excinfo)
+        assert 'MyError' in str(excinfo)

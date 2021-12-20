@@ -3,8 +3,7 @@ import logging
 from progress.bar import Bar
 from page_loader.page import Page
 from page_loader.uploader import Uploader
-from page_loader.errors import NoDirectory, NoContent
-from page_loader.errors import FileSaveError, MyError
+from page_loader.errors import MyError
 
 
 logger = logging.getLogger(__name__)
@@ -28,15 +27,16 @@ def get_html(url, path_to_save):
         raise MyError
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
-        raise NoDirectory(f"{path_to_save} doesn't exist")
+        raise MyError(f"{path_to_save} doesn't exist")
     logger.debug('loading main html')
     html_load = Uploader(url, directory=path_to_save)
     html_load.load_from_web()
-    if html_load.mime.startswith('html'):
-        raise NoContent
-    if not html_load.saved:
-        raise FileSaveError
     page_file_name = html_load.file_name
+    if not html_load.saved:
+        raise MyError(f"file {page_file_name} has not been saved")
+    if html_load.mime.startswith('html'):
+        raise MyError(f"loaded file {page_file_name}, but it's not"
+                      f"html-file as MIME is {html_load.mime}")
     logger.debug(f'recieved name of  main html {page_file_name}')
     html_content = load_html_file(os.path.join(path_to_save, page_file_name))
     return html_content, page_file_name

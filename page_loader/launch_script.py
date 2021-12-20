@@ -30,13 +30,16 @@ def main():
     n = 0
     try:
         result = download(args.url, args.output)
-    except MyError:
+    except MyError as e:
         print(f'unable to upload {args.url}')
+        if e.args:
+            msg = e.args[0]
+            print(f'during execution the following error occurs "{msg}"')
         n = 1
         logger.exception(msg=f'Unable to download {args.url}')
 
-    except Exception:
-        logger.critical(f'program finished with  error {Exception}')
+    except Exception as e:
+        logger.critical(f'program finished with  error {e}')
         n = 1
         raise Exception
     else:

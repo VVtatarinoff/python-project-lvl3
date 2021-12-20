@@ -4,7 +4,7 @@ import logging
 
 from fake_useragent import UserAgent
 
-from page_loader.errors import NoConnection, NoContent, MyError
+from page_loader.errors import MyError
 from page_loader.naming import ConvertUrlToName
 
 logger = logging.getLogger(__name__)
@@ -31,12 +31,13 @@ class Uploader(object):
             response = requests.get(self.url, headers=headers, stream=stream)
         except requests.exceptions.ConnectionError:
             logger.critical(f'{self.url} raises connection error')
-            raise NoConnection
+            raise MyError(f'could not establish the connection to {self.url}')
         if not response.ok:
             logger.critical(f'file "{self.url}" could not be '
-                            'recieved from web. Status of response: '
+                            'received from web. Status of response: '
                             f'code {response.status_code}')
-            raise NoConnection
+            raise MyError(f'the response from {self.url} received with '
+                          f'status code "{response.status_code}"')
         return response
 
     def _check_response(self, response):
@@ -44,7 +45,7 @@ class Uploader(object):
         self._mime = content_types[0].lower()
         if not self._file_name:
             self._file_name = ConvertUrlToName(self.url, self._mime).full_name
-        logger.debug(f'response recieved from web for address {self.url},'
+        logger.debug(f'response received from web for address {self.url},'
                      f' response status {response.status_code}, '
                      f'content type {self._mime}')
         if 'content-length' in response.headers:
@@ -53,14 +54,15 @@ class Uploader(object):
             logger.critical(f'file "{self.url}"'
                             ' has no data of length')
             logger.debug(f'header : {response.headers}')
-            raise MyError
+            raise MyError(f"{self.url} - error in response's headers:"
+                          f"no 'content-length'")
         if self._size > self.max_size:
             logger.critical(f'size of content to download {self._size} exceeds'
                             f' max size {self.max_size}allowed')
         elif self._size == 0:
             logger.critical(f'file "{self.directory}/{self._file_name}"'
                             ' has no data to save')
-            raise NoContent
+            raise MyError(f'size of content to download {self._size} is zero')
         else:
             logger.debug(f'size of content to download is {self._size}')
         return response
@@ -72,10 +74,11 @@ class Uploader(object):
             try:
                 for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
                     file.write(chunk)
-            except Exception:
+            except Exception as e:
                 logger.critical(f'file "{self._file_name}"'
                                 ' unable to save to disk')
-                raise Exception
+                raise MyError(f'during saving "{self._file_name}" raised '
+                              f'"{e}"')
             else:
                 logger.debug(f'file {self._file_name}'
                              f' saved to {self.directory}')
