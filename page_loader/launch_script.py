@@ -2,7 +2,7 @@
 import os
 import argparse
 import sys
-from page_loader import init_logger
+import logging
 
 from page_loader.loader import download
 from page_loader.errors import MyError
@@ -14,6 +14,8 @@ ARGUMENTS = [[('-o', '--output'), {'metavar': '[dir]',
                                    'default': current_path, }],
              [('url', ), {'help': 'url link to website'}]]
 
+logger = logging.getLogger(__name__)
+
 
 def prepare_argparse_object():
     parser = argparse.ArgumentParser(usage='page-loader [options] <url>',
@@ -24,7 +26,6 @@ def prepare_argparse_object():
 
 
 def main():
-    logger = init_logger()
     logger.info("program started")
     args = prepare_argparse_object().parse_args()
     n = 0
@@ -39,12 +40,11 @@ def main():
         logger.exception(msg=f'Unable to download {args.url}')
 
     except Exception as e:
-        logger.critical(f'program finished with  error {e}')
+        logger.critical(f'program terminated with  error {e}')
         n = 1
-        raise Exception
     else:
-        logger.info(f'program fininshed, recieved path {result}')
-        print(f'page succesfully downloaded into {result}')
+        logger.info(f'program finished, received path {result}')
+        print(f'page successfully downloaded into {result}')
     sys.exit(n)
 
 

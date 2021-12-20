@@ -59,6 +59,8 @@ class Uploader(object):
         if self._size > self.max_size:
             logger.critical(f'size of content to download {self._size} exceeds'
                             f' max size {self.max_size}allowed')
+            raise MyError(f'size of content to download {self._size} exceeds'
+                          f' max size {self.max_size}allowed')
         elif self._size == 0:
             logger.critical(f'file "{self.directory}/{self._file_name}"'
                             ' has no data to save')

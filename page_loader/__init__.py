@@ -10,13 +10,13 @@ def init_logger():
     formatter = logging.Formatter('%(asctime)s :: %(name)s :'
                                   ': %(levelname)s :: %(message)s')
     sm.setFormatter(formatter)
-    fn = logging.FileHandler('logs/page_loader.log', mode='w')
-    fn.setFormatter(formatter)
-    fn.setLevel('DEBUG')
-    logger.addHandler(fn)
     sm.setLevel('CRITICAL')
     logger.addHandler(sm)
-    return logger
+    # fn = logging.FileHandler('logs/page_loader.log', mode='w')
+    # fn.setFormatter(formatter)
+    # fn.setLevel('DEBUG')
+    # logger.addHandler(fn)
 
 
 __all__ = ('download', 'init_logger')
+init_logger()

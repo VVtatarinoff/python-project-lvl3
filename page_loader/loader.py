@@ -24,7 +24,7 @@ def save_html_file(content, path):
 def get_html(url, path_to_save):
     if not url:
         logger.critical('url to upload is empty')
-        raise MyError
+        raise MyError('no URL was passed to function')
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
         raise MyError(f"{path_to_save} doesn't exist")
@@ -34,10 +34,10 @@ def get_html(url, path_to_save):
     page_file_name = html_load.file_name
     if not html_load.saved:
         raise MyError(f"file {page_file_name} has not been saved")
-    if html_load.mime.startswith('html'):
+    if not html_load.mime.find('html'):
         raise MyError(f"loaded file {page_file_name}, but it's not"
                       f"html-file as MIME is {html_load.mime}")
-    logger.debug(f'recieved name of  main html {page_file_name}')
+    logger.debug(f'received name of  main page - {page_file_name}')
     html_content = load_html_file(os.path.join(path_to_save, page_file_name))
     return html_content, page_file_name
 
