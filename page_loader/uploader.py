@@ -67,8 +67,8 @@ class Uploader(object):
             logger.critical(f'file "{self.url}"'
                             ' has no data of length')
             logger.debug(f'header : {response.headers}')
-            raise MyError(f"{self.url} - error in response's headers:"
-                          f"no 'content-length'")
+            # raise MyError(f"{self.url} - error in response's headers:"
+            #              f"no 'content-length'")
         if self._size > self.max_size:
             logger.critical(f'size of content to download {self._size} exceeds'
                             f' max size {self.max_size}allowed')
