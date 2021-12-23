@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 
 def test_page(fake_urls):
-    page = Page(fake_urls.initital_html, fake_urls.url)
+    page = Page(fake_urls.initial_html, fake_urls.url)
     domain_links = page.link_references
     assert len(domain_links) == 1
     assert fake_urls.url_file in domain_links
