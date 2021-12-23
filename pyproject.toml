@@ -15,7 +15,6 @@ requests = "^2.26.0"
 argparse = "^1.4.0"
 fake-useragent = "^0.1.11"
 bs4 = "^0.0.1"
-lxml = "^4.6.4"
 progress = "^1.6"
 
 

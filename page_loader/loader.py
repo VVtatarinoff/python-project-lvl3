@@ -21,7 +21,9 @@ def check_data(url, path_to_save):
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
         raise MyError(f"{path_to_save} doesn't exist")
-
+    if not os.access(path_to_save, os.W_OK):
+        logger.critical(f"no right so save into directory '{path_to_save}'")
+        raise MyError(f"no right so save into directory '{path_to_save}'")
 
 def download(url, directory):  # noqa C901
     storage_path = os.path.join(os.getcwd(), directory)
