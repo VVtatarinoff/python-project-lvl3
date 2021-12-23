@@ -9,83 +9,64 @@ from page_loader.errors import MyError
 logger = logging.getLogger(__name__)
 
 
-def load_html_file(path):
-    with open(path) as file:
-        content = file.read()
-    return content
-
-
 def save_html_file(content, path):
     with open(path, 'w') as file:
         file.write(content)
-    return os.path.getsize(path)
 
 
-def get_html(url, path_to_save):
+def check_data(url, path_to_save):
     if not url:
         logger.critical('url to upload is empty')
         raise MyError('no URL was passed to function')
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
         raise MyError(f"{path_to_save} doesn't exist")
-    logger.debug('loading main html')
-    html_load = Uploader(url, directory=path_to_save)
-    html_load.load_from_web()
-    page_file_name = html_load.file_name
-    if not html_load.saved:
-        raise MyError(f"file {page_file_name} has not been saved")
-    if not html_load.mime.find('html'):
-        raise MyError(f"loaded file {page_file_name}, but it's not"
-                      f"html-file as MIME is {html_load.mime}")
-    logger.debug(f'received name of  main page - {page_file_name}')
-    html_content = load_html_file(os.path.join(path_to_save, page_file_name))
-    return html_content, page_file_name
 
 
 def download(url, directory):  # noqa C901
-    current_dir = os.getcwd()
-    storage_path = os.path.join(current_dir, directory)
-
+    storage_path = os.path.join(os.getcwd(), directory)
+    check_data(url, storage_path)
     # загружаем главную страницу
-    html_content, page_file_name = get_html(url, directory)
-    path_to_html = os.path.join(storage_path, page_file_name)
-    page_structure = Page(html_content, url)
-    logger.debug('recieved structure of main html')
+    html_load = Uploader(url)
+    html_content = html_load.load_content()
 
     # вычисляем ссылки на директории
-    subdirectory = page_file_name.replace('.html', '_files')
-    abs_subdirectory = os.path.join(storage_path, subdirectory)
+    page_file_name = html_load.file_name
+    path_to_html = os.path.join(storage_path, page_file_name)
+    files_directory = page_file_name.replace('.html', '_files')
+    abs_files_directory = os.path.join(storage_path, files_directory)
 
     # создаем поддиректорию для доменных файлов
-    if not os.path.exists(abs_subdirectory):
-        os.mkdir(abs_subdirectory)
-        logger.debug(f"directory {abs_subdirectory} created")
+    if not os.path.exists(abs_files_directory):
+        os.mkdir(abs_files_directory)
+        logger.debug(f"directory {abs_files_directory} created")
     else:
-        logger.info(f"directory {abs_subdirectory} exists, no need to rewrite")
+        logger.info(f"directory {abs_files_directory} exists, no need to rewrite")
 
     # получаем доменные ссылки и выгружаем файлы
+    page_structure = Page(html_content, url)
+    logger.debug('received structure of main html')
     domain_links = page_structure.link_references
     replacements = dict()
-    total_size = 0
     bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:
-        web_data = Uploader(link, abs_subdirectory)
-        web_data.load_from_web()
+        web_data = Uploader(link, abs_files_directory)
+        web_data.save_from_web()
         if web_data.saved:
             file_name = web_data.file_name
-            replacements[link] = os.path.join(subdirectory, file_name)
+            replacements[link] = os.path.join(files_directory, file_name)
+            status = " SAVED"
+        else:
+            status = " FAILED to load"
         bar.next()
-        total_size += web_data.size
-        print(' ', link, f'size: {web_data.size}')
+        print(' ', link, status)
 
     # подменяем ссылки в html, записываем обновленный файл
     page_structure.change_links(replacements)
     logger.debug('generating updated HTML')
-    html_size = save_html_file(page_structure.html, path_to_html)
+    save_html_file(page_structure.html, path_to_html)
     logger.debug('saving updated HTML')
     bar.next()
-    print(' ', url, f'size: {html_size}')
+    print(' ', url, ' SAVED')
     bar.finish()
-    total_size += html_size
-    print(f'Total bytes saved: {total_size}')
     return path_to_html

@@ -24,13 +24,14 @@ class Uploader(object):
     Скачивание и запись идет частями в битовом представлении.
     """
 
-    def __init__(self, url, directory,
-                 file_name=None, max_size=1024 * 1024 * 20):
+    def __init__(self, url, directory=None,
+                 file_name=None):
         self.CHUNK_SIZE = 1024
-        self.max_size = max_size
-        self._size = 1  # было 0, ради тестов Хекслета пришлось убрать
         self.url = url
-        self.directory = directory
+        if directory:
+            self.directory = directory
+        else:
+            self.directory = os.path.join(os.getcwd())
         self._file_name = file_name
         self._mime = ''
         self.saved = False
@@ -67,24 +68,9 @@ class Uploader(object):
             logger.critical(f'file "{self.url}"'
                             ' has no data of length')
             logger.debug(f'header : {response.headers}')
-            # пришлось закомментить - тесты хекслета на выдают
-            # этот параметр
-            # raise MyError(f"{self.url} - error in response's headers:"
-            #              f"no 'content-length'")
-        if self._size > self.max_size:
-            logger.critical(f'size of content to download {self._size} exceeds'
-                            f' max size {self.max_size}allowed')
-            raise MyError(f'size of content to download {self._size} exceeds'
-                          f' max size {self.max_size}allowed')
-        elif self._size == 0:
-            logger.critical(f'file "{self.directory}/{self._file_name}"'
-                            ' has no data to save')
-            raise MyError(f'size of content to download {self._size} is zero')
-        else:
-            logger.debug(f'size of content to download is {self._size}')
         return response
 
-    def load_from_web(self):
+    def save_from_web(self):
         response = self._send_request()
         self._check_response(response)
         with open(os.path.join(self.directory, self._file_name), 'wb') as file:
@@ -100,6 +86,11 @@ class Uploader(object):
                 logger.debug(f'file {self._file_name}'
                              f' saved to {self.directory}')
                 self.saved = True
+
+    def load_content(self):
+        response = self._send_request()
+        self._check_response(response)
+        return response.text
 
     @property
     def file_name(self):

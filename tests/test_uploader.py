@@ -12,7 +12,7 @@ def test_uploader_wrong_adress(fake_urls):
             with requests_mock.Mocker() as m:
                 fake_urls.mock_adresses(m.get)()
                 test_load = Uploader(fake_urls.url[:-3], temp_dir)
-                test_load.load_from_web()
+                test_load.save_from_web()
             assert 'MyError' in str(excinfo)
 
 
@@ -21,7 +21,7 @@ def test_uploader_wrong_path(fake_urls):
         with requests_mock.Mocker() as m:
             fake_urls.mock_adresses(m.get)()
             test_wrong = Uploader(fake_urls.url, '/asdadaasd')
-            test_wrong.load_from_web()
+            test_wrong.save_from_web()
         assert 'MyError' in str(excinfo)
 
 
@@ -30,7 +30,7 @@ def test_uploader(fake_urls):
         with requests_mock.Mocker() as m:
             fake_urls.mock_adresses(m.get)()
             test_load = Uploader(fake_urls.url, temp_dir)
-            test_load.load_from_web()
+            test_load.save_from_web()
             file_name = fake_urls.path_to_saved_page
             with open(os.path.join(temp_dir, file_name)) as file:
                 text = file.read()
