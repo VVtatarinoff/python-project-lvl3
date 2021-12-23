@@ -65,6 +65,8 @@ class Uploader(object):
 
     def save_from_web(self):
         response = self._send_request()
+        if not response:
+            return
         self._check_response(response)
         with open(os.path.join(self.directory, self._file_name), 'wb') as file:
             try:
