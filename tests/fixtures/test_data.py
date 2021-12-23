@@ -1,6 +1,7 @@
 HTML_LOAD_PATHS = {'url': 'https://test_html/',
                    'url_file': 'https://test_html/courses',
-                   'path_to_saved_file': 'test-html_files/test-html-courses.html',
+                   'path_to_saved_file': 'test-html_files/'
+                                         'test-html-courses.html',
                    'file': 'test-html-courses.html',
                    'initial_html': 'test_html_subfile/test_html.html',
                    'modified_html': 'test_html_subfile/test-html.html',

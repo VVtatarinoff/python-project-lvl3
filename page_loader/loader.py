@@ -3,7 +3,7 @@ import logging
 from progress.bar import Bar
 from page_loader.page import Page
 from page_loader.uploader import Uploader
-from page_loader.errors import MyError
+from page_loader.errors import MyError, NoPermission, NoDirectory
 
 
 logger = logging.getLogger(__name__)
@@ -20,18 +20,33 @@ def check_data(url, path_to_save):
         raise MyError('no URL was passed to function')
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
-        raise MyError(f"{path_to_save} doesn't exist")
-    if not os.access(path_to_save, os.W_OK):
-        logger.critical(f"no right so save into directory '{path_to_save}'")
-        raise MyError(f"no right so save into directory '{path_to_save}'")
+        raise NoDirectory(f"{path_to_save} doesn't exist")
+
+
+def make_directory(path):
+    if os.path.exists(path):
+        try:
+            os.rmdir(path)
+        except PermissionError:
+            logger.critical(f"no right so save into directory '{path}'")
+            raise NoPermission(f"no right so save into directory '{path}'")
+    try:
+        os.mkdir(path)
+    except PermissionError:
+        logger.critical(f"no right so save into directory '{path}'")
+        raise NoPermission(f" access denied so save into directory '{path}'")
+    logger.debug(f"directory {path} created")
+
 
 def download(url, directory):  # noqa C901
+    logger.debug(f'started download, URL {url}, directory {directory}')
     storage_path = os.path.join(os.getcwd(), directory)
     check_data(url, storage_path)
     # загружаем главную страницу
     html_load = Uploader(url)
     html_content = html_load.load_content()
-
+    if not html_content:
+        raise html_load.error
     # вычисляем ссылки на директории
     page_file_name = html_load.file_name
     path_to_html = os.path.join(storage_path, page_file_name)
@@ -39,11 +54,7 @@ def download(url, directory):  # noqa C901
     abs_files_directory = os.path.join(storage_path, files_directory)
 
     # создаем поддиректорию для доменных файлов
-    if not os.path.exists(abs_files_directory):
-        os.mkdir(abs_files_directory)
-        logger.debug(f"directory {abs_files_directory} created")
-    else:
-        logger.info(f"directory {abs_files_directory} exists, no need to rewrite")
+    make_directory(abs_files_directory)
 
     # получаем доменные ссылки и выгружаем файлы
     page_structure = Page(html_content, url)

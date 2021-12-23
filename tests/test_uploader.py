@@ -1,18 +1,13 @@
-import requests_mock
 import requests
 import os
-import pytest
 from bs4 import BeautifulSoup
 from page_loader.uploader import Uploader
-from page_loader.errors import MyError
 
 
 def test_uploader_wrong_adress(fake_urls, temp_directory, requests_mock):
-    with pytest.raises(MyError) as excinfo:
-        requests_mock.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
-        test_load = Uploader(fake_urls.url, temp_directory.name)
-        test_load.load_content()
-    assert 'MyError' in str(excinfo)
+    requests_mock.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
+    test_load = Uploader(fake_urls.url, temp_directory.name)
+    assert not test_load.load_content()
 
 
 def test_uploader(fake_urls, temp_directory, requests_mock):

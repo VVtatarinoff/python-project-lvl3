@@ -1,8 +1,8 @@
-import requests_mock
 import requests
 import pytest
 import os
 from page_loader.loader import download
+from page_loader.errors import NoPermission, NoDirectory, NoConnection
 from bs4 import BeautifulSoup
 
 
@@ -45,15 +45,24 @@ def test_loader_wrong(wrong_domain_subadress, temp_directory, requests_mock):
 
 def test_no_directory(fake_urls, temp_directory, requests_mock):
     wrong_dir = os.path.join(temp_directory.name, '/test')
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(NoDirectory) as excinfo:
         # ссылка на исходную страницу
         fake_urls.mock_adresses(requests_mock.get)()
         download(fake_urls.url, wrong_dir)
-    assert 'MyError' in str(excinfo)
+    assert 'NoDirectory' in str(excinfo)
 
 
-def test_no_page(fake_urls, temp_directory, requests_mock):
-    with pytest.raises(Exception) as excinfo:
-        requests_mock.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
+def test_no_permission(fake_urls, temp_directory, requests_mock):
+    os.chmod(temp_directory.name, 444)
+    fake_urls.mock_adresses(requests_mock.get)()
+    with pytest.raises(NoPermission) as excinfo:
         download(fake_urls.url, temp_directory.name)
-    assert 'MyError' in str(excinfo)
+    assert 'NoPermission' in str(excinfo)
+
+
+def test_no_connection(fake_urls, temp_directory, requests_mock):
+    with pytest.raises(NoConnection) as excinfo:
+        requests_mock.get(fake_urls.url,
+                          exc=requests.exceptions.ConnectionError)
+        download(fake_urls.url, temp_directory.name)
+    assert 'NoConnection' in str(excinfo)

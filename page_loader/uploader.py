@@ -4,7 +4,7 @@ import logging
 
 from fake_useragent import UserAgent
 
-from page_loader.errors import MyError
+from page_loader.errors import NoConnection
 from page_loader.naming import ConvertUrlToName
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class Uploader(object):
             self.directory = os.getcwd()
         self._file_name = file_name
         self._mime = ''
-        self.error = ""
+        self.error = None
         self.saved = False
 
     def _send_request(self, stream=True):
@@ -42,7 +42,8 @@ class Uploader(object):
             response = requests.get(self.url, headers=headers, stream=stream)
         except requests.exceptions.ConnectionError:
             logger.warning(f'{self.url} raises connection error')
-            self.error = f'could not establish the connection to {self.url}'
+            self.error = NoConnection(f'could not establish the '
+                                      f'connection to {self.url}')
             return
         if not response.ok:
             logger.warning(f'file "{self.url}" could not be '
@@ -53,7 +54,7 @@ class Uploader(object):
             return
         return response
 
-    def _check_response(self, response):
+    def _get_name(self, response):
         if 'content-type' in response.headers:
             content_types = response.headers['content-type'].split(';')
             self._mime = content_types[0].lower()
@@ -67,7 +68,7 @@ class Uploader(object):
         response = self._send_request()
         if not response:
             return
-        self._check_response(response)
+        self._get_name(response)
         with open(os.path.join(self.directory, self._file_name), 'wb') as file:
             try:
                 for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
@@ -84,10 +85,12 @@ class Uploader(object):
 
     def load_content(self):
         response = self._send_request()
+        logger.debug(f'received response {bool(response)}')
         if response:
-            self._check_response(response)
+            self._get_name(response)
             return response.text
-        raise MyError(self.error)
+        return None
+        # raise MyError(self.error)
 
     @property
     def file_name(self):
