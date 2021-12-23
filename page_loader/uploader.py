@@ -13,15 +13,12 @@ logger = logging.getLogger(__name__)
 class Uploader(object):
     """
     Объект класса проверяет переданную ссылку, формирует (при
-    необходимости имя файла) и скачивает в указанную директорию
-    Принимает на вход url, путь до директории, опционально - имя файла,
-    максимальный размер файла
-    Максимальный размер установлен для дополнительной безопасности кода -
-    дабы не переполнить диск
-    В начале просиходит подготовка stream, проверка на валидность.
+    необходимости имя файла) и скачивает в указанную директорию или
+    просто передает содержимое как в переменную
+    Принимает на вход url, опционально- путь до директории, имя файла
+    В начале проиcходит подготовка stream, проверка на валидность.
     Если не задано имя файла - получение имени на основе
     url и MIME, используя класс  ConvertUrlToName
-    Скачивание и запись идет частями в битовом представлении.
     """
 
     def __init__(self, url, directory=None,
@@ -62,12 +59,6 @@ class Uploader(object):
         logger.debug(f'response received from web for address {self.url},'
                      f' response status {response.status_code}, '
                      f'content type {self._mime}')
-        if 'content-length' in response.headers:
-            self._size = int(response.headers["content-length"])
-        else:
-            logger.critical(f'file "{self.url}"'
-                            ' has no data of length')
-            logger.debug(f'header : {response.headers}')
         return response
 
     def save_from_web(self):
@@ -89,17 +80,11 @@ class Uploader(object):
 
     def load_content(self):
         response = self._send_request()
-        self._check_response(response)
-        return response.text
+        if response:
+            self._check_response(response)
+            return response.text
+        raise MyError(f'could not upload source page{self.url}')
 
     @property
     def file_name(self):
         return self._file_name
-
-    @property
-    def mime(self):
-        return self._mime
-
-    @property
-    def size(self):
-        return self._size
