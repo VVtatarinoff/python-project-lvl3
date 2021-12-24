@@ -1,5 +1,7 @@
 import os
 import logging
+import shutil
+
 from progress.bar import Bar
 from page_loader.page import Page
 from page_loader.uploader import Uploader
@@ -26,7 +28,7 @@ def check_data(url, path_to_save):
 def make_directory(path):
     if os.path.exists(path):
         try:
-            os.rmdir(path)
+            shutil.rmtree(path, ignore_errors=True)
         except PermissionError:
             logger.critical(f"no right so save into directory '{path}'")
             raise NoPermission(f"no right so save into directory '{path}'")
