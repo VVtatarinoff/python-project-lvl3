@@ -27,6 +27,7 @@ def prepare_argparse_object():
 
 def main():
     logger.info("program started")
+    print(sys.argv)
     args = prepare_argparse_object().parse_args()
     n = 0
     try:
@@ -45,8 +46,8 @@ def main():
     else:
         logger.info(f'program finished, received path {result}')
         print(f'page successfully downloaded into {result}')
-    sys.exit(n)
+    return n
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
