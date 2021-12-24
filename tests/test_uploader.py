@@ -1,5 +1,6 @@
-import requests
 import os
+import requests
+
 from bs4 import BeautifulSoup
 from page_loader.uploader import Uploader
 

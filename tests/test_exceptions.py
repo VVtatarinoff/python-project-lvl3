@@ -27,8 +27,8 @@ def test_no_connection(fake_urls, temp_directory, requests_mock):
     download(fake_urls.url, temp_directory.name)
 
 
-@pytest.mark.xfail(raises=WrongStatusCode)
 @pytest.mark.parametrize('code', [404, 500])
+@pytest.mark.xfail(raises=WrongStatusCode)
 def test_loader_status_wrong(fake_urls, temp_directory, requests_mock, code):
     url_dictionary = fake_urls.mock_page_data
     url_dictionary['status_code'] = code

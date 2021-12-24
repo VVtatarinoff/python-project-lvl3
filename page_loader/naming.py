@@ -1,9 +1,10 @@
-import re
-from operator import truth
-from urllib3.util import parse_url
 import logging
-import pathlib
 import mimetypes
+from operator import truth
+import pathlib
+import re
+
+from urllib3.util import parse_url
 
 logger = logging.getLogger(__name__)
 

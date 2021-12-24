@@ -1,10 +1,11 @@
+import logging
 import os.path
 import requests
-import logging
 
 from fake_useragent import UserAgent
 
 from page_loader.errors import NoConnection, WrongStatusCode
+from page_loader.errors import NoPermission
 from page_loader.naming import ConvertUrlToName
 
 logger = logging.getLogger(__name__)
@@ -74,6 +75,11 @@ class Uploader(object):
             try:
                 for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
                     file.write(chunk)
+            except PermissionError:
+                logger.critical(f"no right so save into '"
+                                f"directory '{self.directory}'")
+                raise NoPermission(f" access denied so save "
+                                   f"into directory '{self.directory}'")
             except Exception as e:
                 logger.warning(f'file "{self._file_name}"'
                                ' unable to save to disk')

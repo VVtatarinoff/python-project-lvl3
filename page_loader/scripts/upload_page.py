@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import os
 import argparse
-import sys
 import logging
+import os
+import sys
 
 from page_loader.loader import download
 from page_loader.errors import MyError

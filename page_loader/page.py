@@ -1,7 +1,7 @@
-from bs4 import BeautifulSoup
-import urllib3
 import logging
+import urllib3
 
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
