@@ -29,10 +29,10 @@ class FakeRequestData(object):
 
     @property
     def mock_page_data(self):
-        return [self.url, {'headers': {'content-type':
-                                       'text/html; charset=utf-8',
-                                       'content-length': '100'},
-                           'text': self.initial_html}]
+        return {'headers': {'content-type':
+                            'text/html; charset=utf-8',
+                            'content-length': '100'},
+                'text': self.initial_html}
 
     @property
     def mock_domain_data(self):
@@ -40,9 +40,9 @@ class FakeRequestData(object):
             attr = 'text'
         else:
             attr = 'content'
-        return [self.url_file, {'headers': {'content-type': self.file_type,
-                                            'content-length': '100'},
-                                attr: self.file_content}]
+        return {'headers': {'content-type': self.file_type,
+                            'content-length': '100'},
+                attr: self.file_content}
 
 
 @pytest.fixture(scope="session", params=(HTML_LOAD_PATHS,

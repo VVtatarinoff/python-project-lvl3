@@ -15,8 +15,8 @@ def test_no_directory(fake_urls, temp_directory):
 @pytest.mark.xfail(raises=NoPermission)
 def test_no_permission(fake_urls, temp_directory, requests_mock):
     os.chmod(temp_directory.name, 444)
-    requests_mock.get(fake_urls.mock_page_data[0],
-                      **fake_urls.mock_page_data[1])
+    requests_mock.get(fake_urls.url,
+                      **fake_urls.mock_page_data)
     download(fake_urls.url, temp_directory.name)
 
 
@@ -30,10 +30,9 @@ def test_no_connection(fake_urls, temp_directory, requests_mock):
 @pytest.mark.xfail(raises=WrongStatusCode)
 @pytest.mark.parametrize('code', [404, 500])
 def test_loader_status_wrong(fake_urls, temp_directory, requests_mock, code):
-    url_page_link = fake_urls.mock_page_data[0]
-    url_dictionary = fake_urls.mock_page_data[1]
+    url_dictionary = fake_urls.mock_page_data
     url_dictionary['status_code'] = code
-    requests_mock.get(url_page_link, **url_dictionary)
-    requests_mock.get(fake_urls.mock_domain_data[0],
-                      **fake_urls.mock_domain_data[1])
+    requests_mock.get(fake_urls.url, **url_dictionary)
+    requests_mock.get(fake_urls.url_file,
+                      **fake_urls.mock_domain_data)
     download(fake_urls.url, temp_directory.name)

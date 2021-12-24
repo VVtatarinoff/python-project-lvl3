@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup
 
 def test_loader(fake_urls, temp_directory, requests_mock):
     # ссылка на исходную страницу
-    requests_mock.get(fake_urls.mock_page_data[0],
-                      **fake_urls.mock_page_data[1])
-    requests_mock.get(fake_urls.mock_domain_data[0],
-                      **fake_urls.mock_domain_data[1])
+    requests_mock.get(fake_urls.url,
+                      **fake_urls.mock_page_data)
+    requests_mock.get(fake_urls.url_file,
+                      **fake_urls.mock_domain_data)
     # fake_urls.mock_adresses(requests_mock.get)()
     download(fake_urls.url, temp_directory.name)
     # проверка основго файла
@@ -32,12 +32,11 @@ def test_loader(fake_urls, temp_directory, requests_mock):
 # все, кроме доменного файла должно присутствовать
 @pytest.mark.parametrize('code', [404, 500])
 def test_loader_wrong(fake_urls, temp_directory, requests_mock, code):
-    requests_mock.get(fake_urls.mock_page_data[0],
-                      **fake_urls.mock_page_data[1])
-    url_domain_link = fake_urls.mock_domain_data[0]
-    url_dictionary = fake_urls.mock_domain_data[1]
+    requests_mock.get(fake_urls.url,
+                      **fake_urls.mock_page_data)
+    url_dictionary = fake_urls.mock_domain_data
     url_dictionary['status_code'] = code
-    requests_mock.get(url_domain_link, **url_dictionary)
+    requests_mock.get(fake_urls.url_file, **url_dictionary)
 
     download(fake_urls.url, temp_directory.name)
     files_directory = fake_urls.path_to_saved_file
