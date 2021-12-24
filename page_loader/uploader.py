@@ -43,16 +43,13 @@ class Uploader(object):
             response = requests.get(self.url, headers=headers, stream=stream)
         except requests.exceptions.ConnectionError:
             logger.warning(f'{self.url} raises connection error')
-            self.error = NoConnection(f'could not establish the '
-                                      f'connection to {self.url}')
+            self.error = NoConnection(self.url)
             return
         if not response.ok:
             logger.warning(f'file "{self.url}" could not be '
                            'received from web. Status of response: '
                            f'code {response.status_code}')
-            self.error = WrongStatusCode(f'the response from {self.url} '
-                                         'received with status code'
-                                         f'"{response.status_code}"')
+            self.error = WrongStatusCode(response.status_code, self.url)
             return
         logger.debug(f'response received from web for address {self.url},'
                      f' response status {response.status_code}')
@@ -78,8 +75,7 @@ class Uploader(object):
             except PermissionError:
                 logger.critical(f"no right so save into '"
                                 f"directory '{self.directory}'")
-                raise NoPermission(f" access denied so save "
-                                   f"into directory '{self.directory}'")
+                raise NoPermission(path=self.directory)
             except Exception as e:
                 logger.warning(f'file "{self._file_name}"'
                                ' unable to save to disk')
@@ -97,7 +93,6 @@ class Uploader(object):
             self._get_name(response)
             return response.text
         return None
-        # raise MyError(self.error)
 
     @property
     def file_name(self):

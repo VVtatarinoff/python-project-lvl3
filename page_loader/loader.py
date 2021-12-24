@@ -22,7 +22,7 @@ def check_data(url, path_to_save):
         raise MyError('no URL was passed to function')
     if not os.path.exists(path_to_save):
         logger.critical(f"directory '{path_to_save}' doesn't exist")
-        raise NoDirectory(f"{path_to_save} doesn't exist")
+        raise NoDirectory(path_to_save)
 
 
 def make_directory(path):
@@ -32,7 +32,7 @@ def make_directory(path):
         os.mkdir(path)
     except PermissionError:
         logger.critical(f"no right so save into directory '{path}'")
-        raise NoPermission(f" access denied so save into directory '{path}'")
+        raise NoPermission(path=path)
     logger.debug(f"directory {path} created")
 
 
