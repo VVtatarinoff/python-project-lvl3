@@ -27,20 +27,22 @@ class FakeRequestData(object):
         self.initial_html = get_data(self.initial_html)
         self.modified_html = get_data(self.modified_html)
 
-    def mock_adresses(self, func):
-        def inner():
-            func(self.url, headers={'content-type': 'text/html; charset=utf-8',
-                                    'content-length': '100'},
-                 text=self.initial_html)
-            if self.read_mode == 'r':
-                func(self.url_file, headers={'content-type': self.file_type,
-                                             'content-length': '100'},
-                     text=self.file_content)
-            else:
-                func(self.url_file, headers={'content-type': self.file_type,
-                                             'content-length': '100'},
-                     content=self.file_content)
-        return inner
+    @property
+    def mock_page_data(self):
+        return [self.url, {'headers': {'content-type':
+                                       'text/html; charset=utf-8',
+                                       'content-length': '100'},
+                           'text': self.initial_html}]
+
+    @property
+    def mock_domain_data(self):
+        if self.read_mode == 'r':
+            attr = 'text'
+        else:
+            attr = 'content'
+        return [self.url_file, {'headers': {'content-type': self.file_type,
+                                            'content-length': '100'},
+                                attr: self.file_content}]
 
 
 @pytest.fixture(scope="session", params=(HTML_LOAD_PATHS,
@@ -53,23 +55,6 @@ def fake_urls(request):
 @pytest.fixture()
 def temp_directory():
     return tempfile.TemporaryDirectory()
-
-
-@pytest.fixture(scope="session")
-def wrong_domain_subadress():
-    result = {
-        'html': """<html>
-    <head>
-        <link href="/courses" rel="canonical">
-    </head>
-</html>""",
-        'url': 'http://www.post.com',
-        'url_file': 'http://www.post.com/courses',
-        'directory': 'www-post-com_files',
-        'main-file': 'www-post-com.html',
-        'file': 'www-post-com-course.html',
-        'response_code': 404}
-    return result
 
 
 @pytest.fixture(scope="session", params=NAMES)

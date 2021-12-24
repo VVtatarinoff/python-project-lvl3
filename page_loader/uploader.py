@@ -4,7 +4,7 @@ import logging
 
 from fake_useragent import UserAgent
 
-from page_loader.errors import NoConnection
+from page_loader.errors import NoConnection, WrongStatusCode
 from page_loader.naming import ConvertUrlToName
 
 logger = logging.getLogger(__name__)
@@ -49,9 +49,12 @@ class Uploader(object):
             logger.warning(f'file "{self.url}" could not be '
                            'received from web. Status of response: '
                            f'code {response.status_code}')
-            self.error = (f'the response from {self.url} received with '
-                          f'status code "{response.status_code}"')
+            self.error = WrongStatusCode(f'the response from {self.url} '
+                                         'received with status code'
+                                         f'"{response.status_code}"')
             return
+        logger.debug(f'response received from web for address {self.url},'
+                     f' response status {response.status_code}')
         return response
 
     def _get_name(self, response):
@@ -60,9 +63,7 @@ class Uploader(object):
             self._mime = content_types[0].lower()
         if not self._file_name:
             self._file_name = ConvertUrlToName(self.url, self._mime).full_name
-        logger.debug(f'response received from web for address {self.url},'
-                     f' response status {response.status_code}, '
-                     f'content type {self._mime}')
+        logger.debug(f'generated file name {self._file_name}')
 
     def save_from_web(self):
         response = self._send_request()

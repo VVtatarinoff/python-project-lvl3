@@ -8,10 +8,14 @@ def test_uploader_wrong_adress(fake_urls, temp_directory, requests_mock):
     requests_mock.get(fake_urls.url, exc=requests.exceptions.ConnectionError)
     test_load = Uploader(fake_urls.url, temp_directory.name)
     assert not test_load.load_content()
+    assert test_load.error
 
 
 def test_uploader(fake_urls, temp_directory, requests_mock):
-    fake_urls.mock_adresses(requests_mock.get)()
+    requests_mock.get(fake_urls.mock_page_data[0],
+                      **fake_urls.mock_page_data[1])
+    requests_mock.get(fake_urls.mock_domain_data[0],
+                      **fake_urls.mock_domain_data[1])
     test_load = Uploader(fake_urls.url, temp_directory.name)
     test_load.save_from_web()
     file_name = fake_urls.path_to_saved_page
