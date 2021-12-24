@@ -27,27 +27,23 @@ def prepare_argparse_object():
 
 def main():
     logger.info("program started")
-    print(sys.argv)
     args = prepare_argparse_object().parse_args()
     n = 0
     try:
         result = download(args.url, args.output)
     except MyError as e:
         print(f'unable to upload {args.url}')
-        if e.args:
-            msg = e.args[0]
-            print(f'during execution the following error occurs "{msg}"')
+        print(f'during execution the following error occurs: {e}')
         n = 1
         logger.exception(msg=f'Unable to download {args.url}')
-
     except Exception as e:
         logger.critical(f'program terminated with  error {e}')
         n = 1
     else:
         logger.info(f'program finished, received path {result}')
         print(f'page successfully downloaded into {result}')
-    return n
+    sys.exit(n)
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
