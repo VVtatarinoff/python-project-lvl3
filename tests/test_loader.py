@@ -11,10 +11,12 @@ def test_loader(fake_urls, temp_directory, requests_mock):
     requests_mock.get(fake_urls.url_file,
                       **fake_urls.mock_domain_data)
     # fake_urls.mock_adresses(requests_mock.get)()
-    download(fake_urls.url, temp_directory.name)
-    # проверка основго файла
     file_name = fake_urls.path_to_saved_page
-    with open(os.path.join(temp_directory.name, file_name)) as file:
+    expected_path = os.path.join(temp_directory.name, file_name)
+    created_path = download(fake_urls.url, temp_directory.name)
+    assert expected_path == created_path
+    # проверка основного файла
+    with open(expected_path) as file:
         text = file.read()
     created_html = BeautifulSoup(text, "html.parser").prettify()
     required_html = BeautifulSoup(fake_urls.modified_html,

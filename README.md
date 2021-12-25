@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/74a5be3859e7be31d50f/test_coverage)](https://codeclimate.com/github/VVtatarinoff/python-project-lvl3/test_coverage)
 
 # Page loader
-'Page-loader' is a tool that upload specified html file and all related domain files to local drive
+'Page-loader' is a tool that uploads specified html file and all related domain files to local drive
     
 The package provides as terminal session work as python package to include in other packages
 The output is an HTML file and domain files saved in separate directory. HTML file's link is replaced by 
