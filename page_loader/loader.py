@@ -5,8 +5,8 @@ from progress.bar import Bar
 
 from page_loader.errors import MyError, NoPermission, NoDirectory
 from page_loader.page import Page
-from page_loader.uploader import Uploader
-
+from page_loader.uploader import save_from_web
+from page_loader.uploader import load_content_from_web
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,9 @@ def download(url, directory):  # noqa C901
     storage_path = os.path.join(os.getcwd(), directory)
     check_data(url, storage_path)
     # загружаем главную страницу
-    html_load = Uploader(url)
-    html_content = html_load.load_content()
-    if not html_content:
-        raise html_load.error
+    html_content, page_file_name = load_content_from_web(url)
+
     # вычисляем ссылки на директории
-    page_file_name = html_load.file_name
     path_to_html = os.path.join(storage_path, page_file_name)
     files_directory = page_file_name.replace('.html', '_files')
     abs_files_directory = os.path.join(storage_path, files_directory)
@@ -61,10 +58,8 @@ def download(url, directory):  # noqa C901
     replacements = dict()
     bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:
-        web_data = Uploader(link, abs_files_directory)
-        web_data.save_from_web()
-        if web_data.saved:
-            file_name = web_data.file_name
+        file_name = save_from_web(link, abs_files_directory)
+        if file_name:
             replacements[link] = os.path.join(files_directory, file_name)
         bar.next()
 
