@@ -59,7 +59,7 @@ def save_from_web(url, directory):
             logger.critical(f"no right so save into '"
                             f"directory '{directory}'")
             raise NoPermission(path=directory)
-        except Exception as e:
+        except Exception:
             logger.warning(f'file "{file_name}"'
                            ' unable to save to disk')
         else:

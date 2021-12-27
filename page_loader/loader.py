@@ -3,7 +3,7 @@ import os
 
 from progress.bar import Bar
 
-from page_loader.errors import MyError, NoPermission, NoDirectory
+from page_loader.errors import NoPermission, NoDirectory
 from page_loader.page import Page
 from page_loader.uploader import save_from_web
 from page_loader.uploader import load_content_from_web

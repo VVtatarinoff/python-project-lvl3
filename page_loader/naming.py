@@ -33,6 +33,6 @@ def create_name_from_url(url, mime=''):
         path = path[:-len(suffix)]
     netloc = parse_url(url).netloc
     logger.debug(f'for {url} extracted "{suffix}" extension')
-    short_name = create_short_name(netloc+path)
+    short_name = create_short_name(netloc + path)
     logger.debug(f'for {url} created "{short_name}" short_name')
     return short_name + suffix
