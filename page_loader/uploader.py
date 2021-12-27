@@ -6,7 +6,8 @@ from fake_useragent import UserAgent
 
 from page_loader.errors import NoConnection, WrongStatusCode
 from page_loader.errors import NoPermission
-from page_loader.naming import ConvertUrlToName
+from page_loader.naming import create_name_from_url
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class Uploader(object):
             content_types = response.headers['content-type'].split(';')
             self._mime = content_types[0].lower()
         if not self._file_name:
-            self._file_name = ConvertUrlToName(self.url, self._mime).full_name
+            self._file_name = create_name_from_url(self.url, self._mime)
         logger.debug(f'generated file name {self._file_name}')
 
     def save_from_web(self):

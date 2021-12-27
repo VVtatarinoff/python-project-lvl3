@@ -66,11 +66,7 @@ def download(url, directory):  # noqa C901
         if web_data.saved:
             file_name = web_data.file_name
             replacements[link] = os.path.join(files_directory, file_name)
-            status = " SAVED"
-        else:
-            status = " FAILED to load"
         bar.next()
-        print(' ', link, status)
 
     # подменяем ссылки в html, записываем обновленный файл
     page_structure.change_links(replacements)
@@ -78,6 +74,5 @@ def download(url, directory):  # noqa C901
     save_html_file(page_structure.html, path_to_html)
     logger.debug('saving updated HTML')
     bar.next()
-    print(' ', url, ' SAVED')
     bar.finish()
     return path_to_html
