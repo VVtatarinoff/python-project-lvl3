@@ -5,7 +5,6 @@ import os
 import sys
 
 from page_loader.loader import download
-from page_loader.errors import MyError
 
 current_path = os.getcwd()
 ARGUMENTS = [[('-o', '--output'), {'metavar': '[dir]',
@@ -31,14 +30,11 @@ def main():
     n = 0
     try:
         result = download(args.url, args.output)
-    except MyError as e:
+    except Exception as e:
         print(f'unable to upload {args.url}')
         print(f'during execution the following error occurs: {e}')
         n = 1
         logger.exception(msg=f'Unable to download {args.url}')
-    except Exception as e:
-        logger.critical(f'program terminated with  error {e}')
-        n = 1
     else:
         logger.info(f'program finished, received path {result}')
         print(f'page successfully downloaded into {result}')

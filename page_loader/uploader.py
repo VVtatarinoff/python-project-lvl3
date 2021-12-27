@@ -4,8 +4,6 @@ import requests
 
 from fake_useragent import UserAgent
 
-from page_loader.errors import NoConnection, WrongStatusCode
-from page_loader.errors import NoPermission
 from page_loader.naming import create_name_from_url
 
 CHUNK_SIZE = 1024
@@ -22,14 +20,17 @@ def send_request(url, is_raise=False):
     except requests.exceptions.ConnectionError:
         logger.warning(f'{url} raises connection error')
         if is_raise:
-            raise NoConnection(url)
+            message = f'could not establish connection to"{url}" '
+            raise requests.exceptions.ConnectionError(message)
         return
     if not response.ok:
         logger.warning(f'file "{url}" could not be '
                        'received from web. Status of response: '
                        f'code {response.status_code}')
         if is_raise:
-            raise WrongStatusCode(response.status_code, url)
+            message = f'response from URL {url} with error ' \
+                      f'status-code {response.status_code}'
+            raise requests.exceptions.HTTPError(message)
         return
     logger.debug(f'response received from web for address {url},'
                  f' response status {response.status_code}')
@@ -58,10 +59,7 @@ def save_from_web(url, directory):
         except PermissionError:
             logger.critical(f"no right so save into '"
                             f"directory '{directory}'")
-            raise NoPermission(path=directory)
-        except Exception:
-            logger.warning(f'file "{file_name}"'
-                           ' unable to save to disk')
+            raise PermissionError(f'Access denied for "{directory}"')
         else:
             logger.debug(f'file {file_name}'
                          f' saved to {directory}')
