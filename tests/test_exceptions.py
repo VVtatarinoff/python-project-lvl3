@@ -6,17 +6,19 @@ from page_loader.errors import NoPermission, NoDirectory
 from page_loader.errors import NoConnection, WrongStatusCode
 
 
-def test_no_directory(fake_urls, temp_directory):
+def test_no_directory(fake_urls, temp_directory, requests_mock):
     wrong_dir = os.path.join(temp_directory.name, '/test')
+    requests_mock.get(fake_urls.url,
+                      **fake_urls.mock_page_data)
     with pytest.raises(NoDirectory) as e:
         download(fake_urls.url, wrong_dir)
     assert e.match(wrong_dir)
 
 
 def test_no_permission(fake_urls, temp_directory, requests_mock):
-    os.chmod(temp_directory.name, 444)
     requests_mock.get(fake_urls.url,
                       **fake_urls.mock_page_data)
+    os.chmod(temp_directory.name, 444)
     with pytest.raises(NoPermission) as e:
         download(fake_urls.url, temp_directory.name)
     assert e.match(temp_directory.name)

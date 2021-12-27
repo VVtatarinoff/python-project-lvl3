@@ -16,30 +16,24 @@ def save_html_file(content, path):
         file.write(content)
 
 
-def check_data(url, path_to_save):
-    if not url:
-        logger.critical('url to upload is empty')
-        raise MyError('no URL was passed to function')
-    if not os.path.exists(path_to_save):
-        logger.critical(f"directory '{path_to_save}' doesn't exist")
-        raise NoDirectory(path_to_save)
-
-
 def make_directory(path):
-    if os.path.exists(path):
-        return
     try:
         os.mkdir(path)
     except PermissionError:
         logger.critical(f"no right so save into directory '{path}'")
         raise NoPermission(path=path)
-    logger.debug(f"directory {path} created")
+    except FileNotFoundError:
+        logger.critical(f"directory not found '{path}'")
+        raise NoDirectory(path)
+    except FileExistsError:
+        logger.warning(f"directory {path} already exists")
+    else:
+        logger.debug(f"directory {path} created")
 
 
 def download(url, directory):  # noqa C901
     logger.debug(f'started download, URL {url}, directory {directory}')
     storage_path = os.path.join(os.getcwd(), directory)
-    check_data(url, storage_path)
     # загружаем главную страницу
     html_content, page_file_name = load_content_from_web(url)
 
