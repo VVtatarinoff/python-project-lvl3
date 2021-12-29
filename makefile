@@ -23,4 +23,7 @@ package-uninstall:
 	python3 -m pip uninstall hexlet-code
 lint:
 	poetry run flake8 page_loader
+
+command_prompt:
+	export PS1="\W ($(git branch 2>/dev/null | grep '^*' | colrm 1 2)) $ "
 .PHONY: install page-loader build package-install tests coverage venv

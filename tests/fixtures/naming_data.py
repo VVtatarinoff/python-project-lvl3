@@ -10,4 +10,8 @@ NAMES = (
     {'url': 'https://Test.com/domain/some',
      'nickname': 'test-com-domain-some.html'},
     {'url': 'https://site.com/blog/about',
-     'nickname': 'site-com-blog-about.html'})
+     'nickname': 'site-com-blog-about.html'},
+    {'url': 'https://abc~.def/gh',
+     'nickname': 'abc-def-gh.html'},
+    {'url': 'https://abc~.def.html/gh',
+     'nickname': 'abc-def-html-gh.html'})

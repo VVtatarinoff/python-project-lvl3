@@ -21,23 +21,17 @@ class Page(BeautifulSoup):
         self.domain_links = self._get_links()
 
     def _get_domain_path(self, path):
-        source_parsed = urlparse(path)
-        normolized_source = None
-        if source_parsed.scheme:
-            if source_parsed.netloc != self.parsed.netloc:
-                normolized_source = None
-            else:
-                normolized_source = path
-        else:
-            normolized_source = urljoin(self.url, path)
-        return normolized_source
+        url = urlparse(path)
+        if url.scheme and url.netloc != self.parsed.netloc:
+            return None
+        return urljoin(self.url, path)
 
     def _get_links(self):
         links = dict()
         for tag in self.find_all():
             if tag.name in self.LINKS_PATTERN:
-                atribute = self.LINKS_PATTERN[tag.name]
-                reference = tag.get(atribute)
+                attribute = self.LINKS_PATTERN[tag.name]
+                reference = tag.get(attribute)
                 if not reference:
                     continue
                 normolized_source = self._get_domain_path(reference)

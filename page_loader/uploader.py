@@ -64,7 +64,6 @@ def save_from_web(url, directory):
             logger.debug(f'file {file_name}'
                          f' saved to {directory}')
             return file_name
-    return
 
 
 def load_content_from_web(url):
