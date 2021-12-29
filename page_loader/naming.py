@@ -1,6 +1,5 @@
 import logging
 import mimetypes
-from operator import truth
 import pathlib
 import re
 
@@ -19,9 +18,8 @@ def extract_suffix(path):
 
 
 def create_short_name(source_name):
-    chunks = re.split(r"[_\W]+", source_name)
-    chunks = list(filter(truth, chunks))
-    return '-'.join(chunks)
+    p = re.compile(r"[_\W]")
+    return p.sub('-', source_name)
 
 
 def create_name_from_url(url, mime=''):

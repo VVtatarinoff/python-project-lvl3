@@ -66,7 +66,7 @@ def save_from_web(url, directory):
             return file_name
 
 
-def load_content_from_web(url):
+def load_text_from_web(url):
     response = send_request(url, is_raise=True)
     logger.debug(f'received response {bool(response)}')
     file_name = get_name(url, response)

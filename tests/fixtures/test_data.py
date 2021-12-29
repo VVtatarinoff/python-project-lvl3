@@ -1,4 +1,4 @@
-HTML_LOAD_PATHS = {'url': 'https://test_html/',
+HTML_LOAD_PATHS = {'url': 'https://test_html',
                    'url_file': 'https://test_html/courses',
                    'path_to_saved_file': 'test-html_files/'
                                          'test-html-courses.html',
@@ -10,7 +10,7 @@ HTML_LOAD_PATHS = {'url': 'https://test_html/',
                    'read_mode': 'r',
                    'file_type': 'text/html; charset=utf-8'}
 
-PNG_LOAD_PATHS = {'url': 'https://test_png/',
+PNG_LOAD_PATHS = {'url': 'https://test_png',
                   'url_file': 'https://test_png/nodejs.png',
                   'path_to_saved_file': 'test-png_files/test-png-nodejs.png',
                   'file': 'test-png-nodejs.png',
@@ -21,7 +21,7 @@ PNG_LOAD_PATHS = {'url': 'https://test_png/',
                   'read_mode': 'rb',
                   'file_type': 'image/png'}
 
-CSS_LOAD_PATHS = {'url': 'https://test_css/',
+CSS_LOAD_PATHS = {'url': 'https://test_css',
                   'url_file': 'https://test_css/assets/application.css',
 
                   'path_to_saved_file': 'test-css_files/test'

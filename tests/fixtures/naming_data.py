@@ -1,6 +1,6 @@
 NAMES = (
     {'url': 'http://www.test.com/',
-     'nickname': 'www-test-com.html'},
+     'nickname': 'www-test-com-.html'},
     {'url': 'http://www.test.com',
      'nickname': 'www-test-com.html'},
     {'url': 'http://www.test.com/test.css',
@@ -12,6 +12,6 @@ NAMES = (
     {'url': 'https://site.com/blog/about',
      'nickname': 'site-com-blog-about.html'},
     {'url': 'https://abc~.def/gh',
-     'nickname': 'abc-def-gh.html'},
+     'nickname': 'abc--def-gh.html'},
     {'url': 'https://abc~.def.html/gh',
-     'nickname': 'abc-def-html-gh.html'})
+     'nickname': 'abc--def-html-gh.html'})

@@ -5,7 +5,7 @@ from progress.bar import Bar
 
 from page_loader.page import Page
 from page_loader.uploader import save_from_web
-from page_loader.uploader import load_content_from_web
+from page_loader.uploader import load_text_from_web
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def download(url, directory):  # noqa C901
     logger.debug(f'started download, URL {url}, directory {directory}')
     storage_path = os.path.join(os.getcwd(), directory)
     # загружаем главную страницу
-    html_content, page_file_name = load_content_from_web(url)
+    html_content, page_file_name = load_text_from_web(url)
 
     # вычисляем ссылки на директории
     path_to_html = os.path.join(storage_path, page_file_name)
@@ -47,7 +47,7 @@ def download(url, directory):  # noqa C901
     # получаем доменные ссылки и выгружаем файлы
     page_structure = Page(html_content, url)
     logger.debug('received structure of main html')
-    domain_links = page_structure.link_references
+    domain_links = page_structure.domain_urls
     replacements = dict()
     bar = Bar(message='Saving files ', max=len(domain_links) + 1)
     for link in domain_links:

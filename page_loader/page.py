@@ -12,15 +12,15 @@ class Page(BeautifulSoup):
     ссылок на доменные ресурсы и замена их на ссылки,
     переданные в аргументоах
     """
-    LINKS_PATTERN = {'img': 'src', 'link': 'href', 'script': 'src'}
+    TAGS_LINK_PATTERN = {'img': 'src', 'link': 'href', 'script': 'src'}
 
     def __init__(self, html, url):
         self.url = url
         self.parsed = urlparse(self.url)
         super().__init__(html, "html.parser")
-        self.domain_links = self._get_links()
+        self.tags_with_domain_links = self._get_links()
 
-    def _get_domain_path(self, path):
+    def _get_domain_url(self, path):
         url = urlparse(path)
         if url.scheme and url.netloc != self.parsed.netloc:
             return None
@@ -29,30 +29,30 @@ class Page(BeautifulSoup):
     def _get_links(self):
         links = dict()
         for tag in self.find_all():
-            if tag.name in self.LINKS_PATTERN:
-                attribute = self.LINKS_PATTERN[tag.name]
+            if tag.name in self.TAGS_LINK_PATTERN:
+                attribute = self.TAGS_LINK_PATTERN[tag.name]
                 reference = tag.get(attribute)
                 if not reference:
                     continue
-                normolized_source = self._get_domain_path(reference)
-                if not normolized_source:
+                domain_url = self._get_domain_url(reference)
+                if not domain_url:
                     continue
-                previous_items = links.setdefault(normolized_source, [])
+                previous_items = links.setdefault(domain_url, [])
                 previous_items.append(tag)
-                links[normolized_source] = previous_items
+                links[domain_url] = previous_items
         logger.debug(f'extracted {len(links)} domain names')
         return links
 
     @property
-    def link_references(self):
-        return self.domain_links.keys()
+    def domain_urls(self):
+        return self.tags_with_domain_links.keys()
 
     def change_links(self, new_links):
         logger.debug(f'started to rename {len(new_links)} html domain names')
         for old_link, new_link in new_links.items():
-            tags = self.domain_links[old_link]
+            tags = self.tags_with_domain_links[old_link]
             for tag in tags:
-                attr = self.LINKS_PATTERN[tag.name]
+                attr = self.TAGS_LINK_PATTERN[tag.name]
                 tag[attr] = new_link
                 logger.debug(f'{old_link} CHANGED TO {new_link}')
 
